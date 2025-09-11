@@ -2,4 +2,4 @@
 
 This repo will start you off with an initial configuration that you'll modify as part of Checkpoint 1. As part of the modifications, you'll eventually delete the contents of this README and replace it with documentation for your project.
 
-![Diagram for Number Letter Count](https://github.com/CPS353-Suny-New-Paltz/project-starter-code-Vrajpatel5123/main/SE%20Diagram.jpg?raw=true)
+![Diagram for Number Letter Count](https://github.com/CPS353-Suny-New-Paltz/project-starter-code-Vrajpatel5123/main/SE-Diagram.jpg?raw=true)
