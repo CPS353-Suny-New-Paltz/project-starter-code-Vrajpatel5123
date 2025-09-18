@@ -1,4 +1,4 @@
-package NumberLetterCount;
+package NumberLetterCount.DataStoring;
 
 public class ComputeApi {
 
