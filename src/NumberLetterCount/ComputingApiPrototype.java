@@ -1,9 +1,8 @@
-package NumberLetterCount.DataStoring;
+package NumberLetterCount;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import NumberLetterCount.Fetching.PassData;
 import project.annotations.ConceptualAPIPrototype;
 
 public class ComputingApiPrototype {
@@ -26,31 +25,8 @@ public class ComputingApiPrototype {
 		//Just returns the same data
 	}
 	
-	public void sentData(SendInfo Sdata) {
-		this.sentData(Sdata);
+	public void writeResult(String result, String delimiters) {
+		
 	}
-	
-	public void recieveData(RecieveInfo Rdata) {
-		this.recieveData(Rdata);
-	}
-	
-	public void extractData(Extract Edata) {
-		this.extractData(Edata);
-	}
-	
-	public void pass(PassData pdata) {
-		this.pass(pdata);
-	}
-	
-	public void process(ProcessData prdata) {
-		this.process(prdata);
-	}
-	
-	
-	
-	
-	
-	
-	
 
 }
