@@ -1,7 +1,5 @@
 package NumberLetterCount.DataStoring;
 
-import NumberLetterCount.Computing.RecieveInfo;
-import NumberLetterCount.Computing.SendInfo;
 import project.annotations.ProcessAPIPrototype;
 
 public class DataStoreApiPrototype {
