@@ -1,7 +1,6 @@
 package NumberLetterCount.Fetching;
 
 
-import NumberLetterCount.DataStoring.Delimiters;
 import project.annotations.NetworkAPI;
 
 @NetworkAPI
