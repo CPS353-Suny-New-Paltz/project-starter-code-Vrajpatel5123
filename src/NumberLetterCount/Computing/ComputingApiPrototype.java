@@ -3,7 +3,7 @@ package NumberLetterCount.Computing;
 import java.util.ArrayList;
 import java.util.List;
 
-import NumberLetterCount.Computing.PassData;
+import numberlettercount.computing.PassData;
 import project.annotations.ConceptualAPIPrototype;
 
 public class ComputingApiPrototype {
@@ -26,24 +26,24 @@ public class ComputingApiPrototype {
 		//Just returns the same data
 	}
 	
-	public void sentData(SendInfo Sdata) {
-		this.sentData(Sdata);
+	public void sentData(SendInfo sData) {
+		this.sentData(sData);
 	}
 	
-	public void recieveData(RecieveInfo Rdata) {
-		this.recieveData(Rdata);
+	public void recieveData(RecieveInfo rData) {
+		this.recieveData(rData);
 	}
 	
-	public void extractData(Extract Edata) {
-		this.extractData(Edata);
+	public void extractData(Extract eData) {
+		this.extractData(eData);
 	}
 	
-	public void pass(PassData pdata) {
-		this.pass(pdata);
+	public void pass(PassData pData) {
+		this.pass(pData);
 	}
 	
-	public void process(ProcessData prdata) {
-		this.process(prdata);
+	public void process(ProcessData prData) {
+		this.process(prData);
 	}
 	
 	
