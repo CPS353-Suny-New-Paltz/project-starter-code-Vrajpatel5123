@@ -18,7 +18,7 @@ public class ComputingApiPrototype {
 	
 	
 	public void initialize(int inputData) {
-		this.currentData = currentData;
+		this.initialize(inputData);
 	}
 	
 	public List<Integer> compute(){
