@@ -19,11 +19,9 @@ public interface FetchApi {
 	Display displayIt();
 	 
 	
-//	String setInputSource(String inputSource);
-//	
-//	String setOutputResult(String outputResult);
-//	
-//	String setDelimiters(String delimiters);
+	//String setInputSource(String inputSource);
+	//String setOutputResult(String outputResult);	
+    //String setDelimiters(String delimiters);
 	
 	//String useDefaultDelimiters();
 
