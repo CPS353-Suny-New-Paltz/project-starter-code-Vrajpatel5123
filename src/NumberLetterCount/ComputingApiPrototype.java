@@ -1,4 +1,4 @@
-package NumberLetterCount;
+package numberlettercount;
 
 import java.util.ArrayList;
 import java.util.List;
