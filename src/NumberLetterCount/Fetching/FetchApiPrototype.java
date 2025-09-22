@@ -10,7 +10,7 @@ public class FetchApiPrototype {
 	
 	
 	
-	final String DEFAULT_DELIMITERS = ".;|";
+	final String defaultDelimiters = ".;|";
 	
 	private String delimiters;
 
