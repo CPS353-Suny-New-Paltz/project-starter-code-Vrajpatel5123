@@ -1,4 +1,4 @@
-package NumberLetterCount.DataStoring;
+package numberlettercount.datastoring;
 
 public class Serialize {
 
