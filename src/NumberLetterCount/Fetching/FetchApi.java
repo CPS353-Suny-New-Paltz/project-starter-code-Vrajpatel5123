@@ -1,4 +1,4 @@
-package NumberLetterCount.Fetching;
+package numberlettercount.fetching;
 
 
 import project.annotations.NetworkAPI;
