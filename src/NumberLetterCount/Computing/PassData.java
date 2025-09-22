@@ -1,4 +1,4 @@
-package NumberLetterCount.Computing;
+package numberlettercount.computing;
 
 public class PassData {
 

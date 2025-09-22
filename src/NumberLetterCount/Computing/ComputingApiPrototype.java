@@ -1,4 +1,4 @@
-package NumberLetterCount.Computing;
+package numberlettercount.computing;
 
 import java.util.ArrayList;
 import java.util.List;
