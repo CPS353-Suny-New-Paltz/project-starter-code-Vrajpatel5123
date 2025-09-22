@@ -26,24 +26,24 @@ public class ComputingApiPrototype {
 		//Just returns the same data
 	}
 	
-	public void sentData(SendInfo sData) {
-		this.sentData(sData);
+	public void sentData(SendInfo sendData) {
+		this.sentData(sendData);
 	}
 	
-	public void recieveData(RecieveInfo rData) {
-		this.recieveData(rData);
+	public void recieveData(RecieveInfo recieveData) {
+		this.recieveData(recieveData);
 	}
 	
-	public void extractData(Extract eData) {
-		this.extractData(eData);
+	public void extractData(Extract extractData) {
+		this.extractData(extractData);
 	}
 	
-	public void pass(PassData pData) {
-		this.pass(pData);
+	public void pass(PassData passData) {
+		this.pass(passData);
 	}
 	
-	public void process(ProcessData prData) {
-		this.process(prData);
+	public void process(ProcessData processData) {
+		this.process(processData);
 	}
 	
 	
