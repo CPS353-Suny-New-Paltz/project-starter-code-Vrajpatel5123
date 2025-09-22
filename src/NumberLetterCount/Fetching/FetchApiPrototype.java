@@ -20,7 +20,7 @@ public class FetchApiPrototype {
 		fetchapi.insertRequest(new FetchRequest(123));		
 	}
 	
-	public  String getInputSource(String InputSource) {
+	public  String getInputSource(String inputSource) {
 		return inputSource;
 	}
 	
@@ -32,16 +32,16 @@ public class FetchApiPrototype {
 		return this.setDelimiters(delimiters);
 	}
 	
-	public void useDefaultDelimiters() {
-		this.delimiters = DEFAULT_DELIMITERS;
+	public String useDefaultDelimiters(String delimiters) {
+		return this.useDefaultDelimiters(delimiters);
 	}
 	
 	public void passData(PassData data) {
 		this.passData(data);
 	}
 	
-	public void DisplayResult(Display display) {
-		this.DisplayResult(display);
+	public void displayResult(Display display) {
+		this.displayResult(display);
 	}
 
 }

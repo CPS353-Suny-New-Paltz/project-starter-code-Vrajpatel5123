@@ -14,9 +14,9 @@ public interface FetchApi {
 	
 	Delimiters getDelimiters();
 	
-	PassData InputSource();
+	PassData inputSource();
 	
-	Display DisplayIt();
+	Display displayIt();
 	 
 	
 //	String setInputSource(String inputSource);
