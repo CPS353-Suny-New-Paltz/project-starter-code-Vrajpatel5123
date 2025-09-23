@@ -1,4 +1,4 @@
-package numberlettercount.fetching;
+package numberlettercountfetching;
 
 public class FetchRequest {
 	public FetchRequest(int i) {

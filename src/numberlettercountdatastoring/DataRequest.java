@@ -1,4 +1,4 @@
-package numberlettercount.datastoring;
+package numberlettercountdatastoring;
 
 public class DataRequest {
 

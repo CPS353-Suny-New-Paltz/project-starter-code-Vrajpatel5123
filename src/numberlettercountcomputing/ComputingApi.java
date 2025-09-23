@@ -1,4 +1,4 @@
-package numberlettercount.computing;
+package numberlettercountcomputing;
 
 import java.util.List;
 
