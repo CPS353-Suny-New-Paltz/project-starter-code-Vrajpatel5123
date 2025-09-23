@@ -1,4 +1,4 @@
-package numberlettercount.datastoring;
+package numberlettercountdatastoring;
 
 import project.annotations.ProcessAPIPrototype;
 
