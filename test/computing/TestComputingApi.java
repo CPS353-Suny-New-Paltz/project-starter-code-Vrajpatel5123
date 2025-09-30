@@ -25,10 +25,10 @@ public class TestComputingApi {
         
         // Test will fail because implementation returns failure value
         List<Integer> inputData = Arrays.asList(1, 2, 3);
-        String Result = computingApi.initalize(inputData);
-        String Result1 = "one,two,three";
+        String result = computingApi.initalize(inputData);
+        String result1 = "one,two,three";
         
-        assertEquals(Result,Result1);
+        assertEquals(result,result1);
         
         
         
