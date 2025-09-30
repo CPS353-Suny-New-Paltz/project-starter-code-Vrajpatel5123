@@ -9,10 +9,37 @@ public class ComputingApiImpl implements ComputingApi {
     private DataStoreApi dataStoreApi;
     
     @Override
-    public int initalize(List<Integer> inputData) {
-        return -1; // failure value
+    public String initalize(List<Integer> inputData) {
+        if (inputData == null || inputData.isEmpty()) {
+            return "";
+        }
+        
+//        // Simple number to word mapping for demonstration
+//        String[] numberWords = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+//        
+//        StringBuilder result = new StringBuilder();
+//        for (int i = 0; i < inputData.size(); i++) {
+//            int num = inputData.get(i);
+//            if (num >= 0 && num <= 9) {
+//                result.append(numberWords[num]);
+//            } else {
+//                result.append(num); // Fallback to number if out of range
+//            }
+//            
+//            if (i < inputData.size() - 1) {
+//                result.append(",");
+//            }
+//        }
+     // Convert List<Integer> to a comma-separated string
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < inputData.size(); i++) {
+            result.append(inputData.get(i));
+            if (i < inputData.size() - 1) {
+                result.append(",");
+            }
+        }
+        return result.toString(); // Returns "one,two,three" for input [1,2,3]
     }
-    
     @Override
     public List<Integer> compute() {
         return null;

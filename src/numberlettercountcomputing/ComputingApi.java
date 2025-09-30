@@ -8,7 +8,7 @@ import project.annotations.ConceptualAPI;
 @ConceptualAPI
 public interface ComputingApi {
 	
-	int initalize(List<Integer> inputData);
+	String initalize(List<Integer> inputData);
 	
 	List<Integer> compute();
 	

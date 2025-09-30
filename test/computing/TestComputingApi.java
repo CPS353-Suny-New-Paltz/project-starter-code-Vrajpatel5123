@@ -6,6 +6,8 @@ import numberlettercountcomputing.ComputingApiImpl;
 import numberlettercountdatastoring.DataStoreApi;
 import numberlettercountfetching.FetchApi;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -23,10 +25,15 @@ public class TestComputingApi {
         
         // Test will fail because implementation returns failure value
         List<Integer> inputData = Arrays.asList(1, 2, 3);
-        int initResult = computingApi.initalize(inputData);
+        String Result = computingApi.initalize(inputData);
+        String Result1 = "one,two,three";
+        
+        assertEquals(Result,Result1);
+        
+        
         
         // This test will fail as expected
-        assert initResult == -1;
+        
     }
 }
 
