@@ -9,7 +9,7 @@ public interface DataStoreApi {
 	
 	
 
-	 String insertRequest(DataRequest dataRequest);	
+	 int insertRequest(DataRequest dataRequest);	
 	
 	 Serialize  serializingData();
 	 
