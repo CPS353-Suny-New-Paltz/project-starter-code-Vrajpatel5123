@@ -1,9 +1,14 @@
 package numberlettercountfetching;
 
 public class FetchRequest {
-	public FetchRequest(int i) {
-		// TODO Auto-generated constructor stub
+	private int number;
+
+	public FetchRequest(int number) {
+		this.number = number;
 	}
 
+	public int getNumber() {
+		return number;
+	}
 
 }
