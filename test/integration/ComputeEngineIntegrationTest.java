@@ -5,7 +5,8 @@ import org.junit.jupiter.api.Test;
 import configuration.TestInputConfiguration;
 import configuration.TestOutputConfiguration;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.Arrays;
 import java.util.List;
 
