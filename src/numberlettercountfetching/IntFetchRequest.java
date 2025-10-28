@@ -1,6 +1,6 @@
 package numberlettercountfetching;
 import java.util.Arrays;
-import java.util.List;
+
 
 public class IntFetchRequest extends FetchRequest {
 	private int data;

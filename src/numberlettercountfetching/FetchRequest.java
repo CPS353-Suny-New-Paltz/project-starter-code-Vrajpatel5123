@@ -6,7 +6,9 @@ public class FetchRequest {
 
 	private List<Integer> data;
 	public FetchRequest() { } // Default constructor
-	public FetchRequest(List<Integer> numbers) { this.data = numbers; } // List constructor
+	public FetchRequest(List<Integer> numbers) {
+		this.data = numbers; 
+	} // List constructor
 	public List<Integer> getData() {
 		return this.data;
 	}
