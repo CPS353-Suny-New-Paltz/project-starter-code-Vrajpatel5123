@@ -3,18 +3,18 @@ import java.util.Arrays;
 import java.util.List;
 
 public class IntFetchRequest extends FetchRequest {
-	 private int data;
+	private int data;
 
-	 public IntFetchRequest(int number) {
-	        super(Arrays.asList(number)); // Pass as List
-	        this.data = number;
-	    }
-	    
-	    public int getIntData() {
-	        return (Integer) data;
-	    }
-    
-//    public FetchRequest(int data) {
-//    	return this.data;
-//    }
+	public IntFetchRequest(int number) {
+		super(Arrays.asList(number)); // Pass as List
+		this.data = number;
+	}
+
+	public int getIntData() {
+		return (Integer) data;
+	}
+
+	//    public FetchRequest(int data) {
+	//    	return this.data;
+	//    }
 }
