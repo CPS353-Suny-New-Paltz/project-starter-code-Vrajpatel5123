@@ -1,12 +1,14 @@
 package numberlettercountfetching;
 
 
+import java.util.List;
+
 import project.annotations.NetworkAPI;
 
 @NetworkAPI
 public interface FetchApi {
 	
-	int insertRequest(FetchRequest fetchRequest);
+	List<Integer> insertRequest(FetchRequest fetchRequest);
 	
 	InputSource getInputSource();
 	

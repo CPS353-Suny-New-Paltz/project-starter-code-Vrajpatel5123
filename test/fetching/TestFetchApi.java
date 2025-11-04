@@ -1,31 +1,44 @@
 package fetching;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 
 import numberlettercountdatastoring.DataStoreApi;
 import numberlettercountfetching.FetchApiImpl;
 import numberlettercountfetching.FetchRequest;
+import numberlettercountfetching.IntFetchRequest;
+import numberlettercountfetching.ListFetchRequest;
+import numberlettercountfetching.StringFetchRequest;
 
 public class TestFetchApi {
 
-	@Test
-	public void testInsertRequest() {
-		// Create mock dependencies
-		DataStoreApi mockDataStoreApi = Mockito.mock(DataStoreApi.class);
+    @Test
+    public void testInsertRequest() {
+        // Create implementation
+        FetchApiImpl fetchApi = new FetchApiImpl();
 
-		// Create implementation with mocked dependency
-		FetchApiImpl fetchApi = new FetchApiImpl();
-		// Note: We'll need to add setter methods or package-private access for dataStoreApi
+        // Test IntFetchRequest
+        FetchRequest intRequest = new IntFetchRequest(123);
+        List<Integer> intResult = fetchApi.insertRequest(intRequest);
+        assertEquals(List.of(123), intResult, "Should return the inserted integer");
 
-		// Test will fail because implementation returns failure value
-		FetchRequest request = new FetchRequest(123);
-		int result = fetchApi.insertRequest(request);
+        // Test ListFetchRequest
+        FetchRequest listRequest = new ListFetchRequest(List.of(1, 2, 3));
+        List<Integer> listResult = fetchApi.insertRequest(listRequest);
+        assertEquals(List.of(1, 2, 3), listResult, "Should return the inserted list");
 
-		// This test will fail as expected
-		assertTrue(result >= 0, "Should return success code but returned: " + result);
-		// The test fails due to the empty implementation isn't working yet
-	}
+        // Test StringFetchRequest
+        FetchRequest stringRequest = new StringFetchRequest("abc");
+        List<Integer> stringResult = fetchApi.insertRequest(stringRequest);
+        assertTrue(stringResult.size() > 0, "Should convert string to ASCII values");
+
+        // Verify all data is stored
+        List<Integer> allStored = fetchApi.getStoredData();
+        assertTrue(allStored.size() >= 4, "Should have stored all inserted data");
+    }
 }
