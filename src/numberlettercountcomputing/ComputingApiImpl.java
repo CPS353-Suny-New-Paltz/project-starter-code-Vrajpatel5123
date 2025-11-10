@@ -1,5 +1,6 @@
 package numberlettercountcomputing;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import numberlettercountdatastoring.DataStoreApi;
@@ -9,8 +10,15 @@ public class ComputingApiImpl implements ComputingApi {
 	private FetchApi fetchApi;
 	private DataStoreApi dataStoreApi;
 
+	public ComputingApiImpl() {
+		// No-argument constructor
+	}
 
-	// Add setters for dependency injection
+	public ComputingApiImpl(FetchApi fetchApi, DataStoreApi dataStoreApi) {
+		this.fetchApi = fetchApi;
+		this.dataStoreApi = dataStoreApi;
+	}
+
 	public void setFetchApi(FetchApi fetchApi) {
 		this.fetchApi = fetchApi;
 	}
@@ -19,44 +27,37 @@ public class ComputingApiImpl implements ComputingApi {
 		this.dataStoreApi = dataStoreApi;
 	}
 
-	@Override
 	public String initalize(List<Integer> inputData) {
+		// USE fetchApi: If inputData is null, try to fetch data
+		if (inputData == null && fetchApi != null) {
+			//			inputData = fetchApi.fetchData();
+		}
+
 		if (inputData == null || inputData.isEmpty()) {
 			return "";
 		}
 
-		// Use extractData to process the input
+		// USE dataStoreApi: Store the input data
+		if (dataStoreApi != null) {
+			//			dataStoreApi.storeInputData(inputData);
+		}
+
+		// Rest of your existing code...
 		Extract extract = extractData();
 		System.out.println("Extracting data: " + extract);
 
-		// Use processData during computation
 		ProcessData processData = processData();
 		processData.setInputData(inputData.toString());
 
-		//        // Simple number to word mapping for demonstration
 		String[] numberWords = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
-		//        
-		//        StringBuilder result = new StringBuilder();
-		//        for (int i = 0; i < inputData.size(); i++) {
-		//            int num = inputData.get(i);
-		//            if (num >= 0 && num <= 9) {
-		//                result.append(numberWords[num]);
-		//            } else {
-		//                result.append(num); // Fallback to number if out of range
-		//            }
-		//            
-		//            if (i < inputData.size() - 1) {
-		//                result.append(",");
-		//            }
-		//        }
-		// Convert List<Integer> to a comma-separated string
+
 		StringBuilder result = new StringBuilder();
 		for (int i = 0; i < inputData.size(); i++) {
 			int num = inputData.get(i);
 			if (num >= 0 && num <= 9) {
 				result.append(numberWords[num]);
 			} else {
-				result.append(num); // Fallback to number if out of range
+				result.append(num);
 			}
 
 			if (i < inputData.size() - 1) {
@@ -64,26 +65,46 @@ public class ComputingApiImpl implements ComputingApi {
 			}
 		}
 
-		// Update processData with result
 		processData.setOutputData(result.toString());
 		System.out.println("Processing data: " + processData);
 
-		return result.toString(); // Returns "one,two,three" for input [1,2,3]
+		// USE dataStoreApi: Store the result
+		if (dataStoreApi != null) {
+			//			dataStoreApi.storeResult(result.toString());
+		}
+
+		return result.toString();
 	}
-	@Override
+
 	public List<Integer> compute() {
-		// Implementation for compute logic
-		// Use passData during computation
+		// USE fetchApi: Get data to compute
+		List<Integer> dataToCompute = null;
+		if (fetchApi != null) {
+			//			dataToCompute = fetchApi.fetchData();
+		}
+
+		if (dataToCompute == null) {
+			dataToCompute = Arrays.asList(1, 2, 3);
+		}
+
 		PassData passData = passData();
 		passData.setData("Computing number to word conversion");
 		System.out.println("Passing data: " + passData);
 
-		return List.of(1, 2, 3);
+		// USE dataStoreApi: Store computation result
+		if (dataStoreApi != null) {
+			//			dataStoreApi.storeComputation(dataToCompute);
+		}
+
+		return dataToCompute;
 	}
 
-	@Override
 	public String writeResult(String result, String delimiters) {
-		// Use sendInfo to send the result
+		// USE dataStoreApi: Write the final result
+		if (dataStoreApi != null) {
+			//			dataStoreApi.writeFinalResult(result, delimiters);
+		}
+
 		SendInfo sendInfo = sendInfo();
 		sendInfo.setData(result);
 		sendInfo.setDestination("output");
@@ -92,11 +113,14 @@ public class ComputingApiImpl implements ComputingApi {
 		return "Processed: " + result + " with delimiters: " + delimiters;
 	}
 
-	@Override
 	public void insertRequest() {
 		System.out.println("Insert request processed");
 
-		// Use all objects in the workflow
+		// USE fetchApi: Process the insert request
+		if (fetchApi != null) {
+			//			fetchApi.processRequest();
+		}
+
 		Extract extract = extractData();
 		extract.setSource("user input");
 		extract.setExtractedData("number data");
@@ -111,6 +135,11 @@ public class ComputingApiImpl implements ComputingApi {
 		passData.setToComponent("storage");
 		System.out.println("Passing: " + passData);
 
+		// USE dataStoreApi: Initialize storage for the request
+		if (dataStoreApi != null) {
+			//			dataStoreApi.initializeForRequest();
+		}
+
 		SendInfo sendInfo = sendInfo();
 		sendInfo.setDestination("client");
 		System.out.println("Sending: " + sendInfo);
@@ -118,42 +147,98 @@ public class ComputingApiImpl implements ComputingApi {
 		RecieveInfo recieveInfo = recieveInfo();
 		recieveInfo.setSource("external system");
 		System.out.println("Receiving: " + recieveInfo);
-
 	}
 
-	@Override
+	// Rest of your methods remain the same...
 	public Extract extractData() {
 		Extract extract = new Extract();
 		extract.setExtractionMethod("number parsing");
 		return extract;
 	}
 
-	@Override
 	public SendInfo sendInfo() {
 		SendInfo sendInfo = new SendInfo();
 		sendInfo.setDestination("default destination");
 		return sendInfo;
 	}
 
-	@Override
 	public RecieveInfo recieveInfo() {
 		RecieveInfo recieveInfo = new RecieveInfo();
 		recieveInfo.setSource("default source");
 		return recieveInfo;
 	}
 
-	@Override
 	public ProcessData processData() {
 		ProcessData processData = new ProcessData();
 		processData.setProcessingType("number_to_words");
 		return processData;
 	}
 
-	@Override
 	public PassData passData() {
 		PassData passData = new PassData();
 		passData.setFromComponent("computing module");
 		passData.setToComponent("storage module");
+		return passData;
+	}
+
+	public List<Integer> processPassData(PassData passData) {
+		System.out.println("Processing pass data: " + passData);
+		List<Integer> resultList = new ArrayList<>();
+
+		if (passData != null) {
+			String data = passData.getData();
+			if (data != null && !data.isEmpty()) {
+				int letterCount = data.replaceAll("[^a-zA-Z]", "").length();
+				System.out.println("Letter count in pass data: " + letterCount);
+				resultList.add(letterCount);
+			}
+
+			if (passData.getFromComponent() != null) {
+				resultList.add(passData.getFromComponent().length());
+			}
+			if (passData.getToComponent() != null) {
+				resultList.add(passData.getToComponent().length());
+			}
+		}
+
+		// USE dataStoreApi: Store processed pass data
+		if (dataStoreApi != null) {
+			//			dataStoreApi.storeProcessedPassData(resultList);
+		}
+
+		return resultList;
+	}
+
+	public PassData passData(int number) {
+		PassData passData = new PassData();
+
+		String[] numberWords = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+		String word = "";
+
+		if (number >= 0 && number <= 9) {
+			word = numberWords[number];
+		} else {
+			word = String.valueOf(number);
+		}
+
+		passData.setData(word);
+		passData.setFromComponent("number_converter");
+		passData.setToComponent("output_processor");
+
+		System.out.println("Created PassData for number " + number + ": " + passData);
+
+		// USE both APIs: Validate and store the pass data
+		if (fetchApi != null) {
+			//			boolean isValid = fetchApi.validateNumber(number);
+			//			if (!isValid) {
+			//				passData.setData("INVALID: " + word);
+			//			}
+		}
+
+		if (dataStoreApi != null) {
+			//			dataStoreApi.storeNumberPassData(passData);
+		}
+
 		return passData;
 	}
 }
