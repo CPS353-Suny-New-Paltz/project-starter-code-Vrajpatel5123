@@ -1,6 +1,8 @@
 package datastoring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -18,13 +20,49 @@ public class TestDataStoreApi {
 
 		// Create implementation with mocked dependency
 		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
-		// Note: We'll need to add setter methods or package-private access for computingApi
+		dataStoreApi.setComputingApi(mockComputingApi);
 
-		// Test will fail because implementation returns empty string
-		DataRequest request = new DataRequest(123);
+		// Test data
+		DataRequest request = new DataRequest(123, "test_source", "test_data");
 		int result = dataStoreApi.insertRequest(request);
 
-		// This test will fail as expected
-		assertEquals("SUCCESS",result);
+		// Should return 0 for success, -1 for failure
+		assertEquals(0, result); // Now returns 0 for success instead of -1
+
+		assertTrue(result >= 0, "Insert request should return success code (>= 0)");
+	}
+
+	@Test
+	public void testInsertRequestWithNull() {
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
+		int result = dataStoreApi.insertRequest(null);
+
+		assertEquals(-1, result); // Should return -1 for null request
+	}
+
+	@Test
+	public void testSerializingData() {
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
+		assertNotNull(dataStoreApi.serializingData());
+	}
+
+	@Test
+	public void testFormatData() {
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
+		assertNotNull(dataStoreApi.formatData());
+	}
+
+	@Test
+	public void testResult() {
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
+		assertNotNull(dataStoreApi.result());
+	}
+
+	@Test
+	public void testStoreData() {
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
+		boolean result = dataStoreApi.storeData("test data", "test_location");
+
+		assertEquals(true, result); // Should return true for successful storage
 	}
 }
