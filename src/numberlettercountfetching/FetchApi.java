@@ -7,16 +7,19 @@ import project.annotations.NetworkAPI;
 
 @NetworkAPI
 public interface FetchApi {
-	
+
 	List<Integer> insertRequest(FetchRequest fetchRequest);
-	
-	InputSource getInputSource();
-	
-	OutputResult getOutputResult();
-	
-	Delimiters getDelimiters();
-	
-	PassData inputSource();
-	
-	Display displayIt();
+
+	//	InputSource getInputSource();
+	//	
+	//	OutputResult getOutputResult();
+	//	
+	//	Delimiters getDelimiters();
+	//	
+	//	PassData inputSource();
+	//	
+	//	Display displayIt();
+
+	List<Integer> fetchAllData();
+	boolean validateNumber(int number);
 }

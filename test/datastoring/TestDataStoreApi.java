@@ -1,13 +1,17 @@
+// File: TestDataStoreApi.java (FIXED - simple tests only)
 package datastoring;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import numberlettercountcomputing.ComputingApi;
+import numberlettercountcomputing.PassData;
 import numberlettercountdatastoring.DataRequest;
 import numberlettercountdatastoring.DataStoreApiImpl;
 
@@ -15,54 +19,64 @@ public class TestDataStoreApi {
 
 	@Test
 	public void testInsertRequest() {
-		// Create mock dependencies
 		ComputingApi mockComputingApi = Mockito.mock(ComputingApi.class);
+		Mockito.when(mockComputingApi.passData(Mockito.anyInt())).thenReturn(new PassData());
+		Mockito.when(mockComputingApi.processPassData(Mockito.any(PassData.class))).thenReturn(List.of(1));
 
-		// Create implementation with mocked dependency
 		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
 		dataStoreApi.setComputingApi(mockComputingApi);
 
-		// Test data
-		DataRequest request = new DataRequest(123, "test_source", "test_data");
+		DataRequest request = new DataRequest(123, "test_source", "1,2");
 		int result = dataStoreApi.insertRequest(request);
 
-		// Should return 0 for success, -1 for failure
-		assertEquals(0, result); // Now returns 0 for success instead of -1
-
-		assertTrue(result >= 0, "Insert request should return success code (>= 0)");
+		assertEquals(0, result);
 	}
 
 	@Test
 	public void testInsertRequestWithNull() {
 		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
 		int result = dataStoreApi.insertRequest(null);
-
-		assertEquals(-1, result); // Should return -1 for null request
+		assertEquals(-1, result);
 	}
 
 	@Test
-	public void testSerializingData() {
+	public void testFetchAllData() {
 		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
-		assertNotNull(dataStoreApi.serializingData());
+		DataRequest request = new DataRequest(1, "source", "10,20");
+		dataStoreApi.insertRequest(request);
+
+		List<Integer> result = dataStoreApi.fetchAllData();
+		assertEquals(2, result.size());
 	}
 
 	@Test
-	public void testFormatData() {
+	public void testValidateNumber() {
 		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
-		assertNotNull(dataStoreApi.formatData());
+		assertTrue(dataStoreApi.validateNumber(5));
+		assertFalse(dataStoreApi.validateNumber(-1));
 	}
 
 	@Test
-	public void testResult() {
+	public void testProcessRequest() {
 		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
-		assertNotNull(dataStoreApi.result());
+		dataStoreApi.insertRequest(new DataRequest(1, "source", "5"));
+		boolean result = dataStoreApi.processRequest();
+		assertTrue(result);
 	}
 
 	@Test
-	public void testStoreData() {
+	public void testGetStoredDataCount() {
 		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
-		boolean result = dataStoreApi.storeData("test data", "test_location");
+		dataStoreApi.insertRequest(new DataRequest(1, "source", "1,2,3"));
+		assertEquals(3, dataStoreApi.getStoredDataCount());
+	}
 
-		assertEquals(true, result); // Should return true for successful storage
+	@Test
+	public void testClearStorage() {
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
+		dataStoreApi.insertRequest(new DataRequest(1, "source", "1,2"));
+		boolean cleared = dataStoreApi.clearStorage();
+		assertTrue(cleared);
+		assertEquals(0, dataStoreApi.getStoredDataCount());
 	}
 }

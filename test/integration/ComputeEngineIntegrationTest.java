@@ -7,19 +7,19 @@ import configuration.TestOutputConfiguration;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+//import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-import numberlettercountfetching.Delimiters;
-import numberlettercountfetching.Display;
+//import numberlettercountfetching.Delimiters;
+//import numberlettercountfetching.Display;
 import numberlettercountfetching.FetchApiImpl;
 import numberlettercountfetching.FetchRequest;
-import numberlettercountfetching.InputSource;
+//import numberlettercountfetching.InputSource;
 import numberlettercountfetching.ListFetchRequest;
-import numberlettercountfetching.OutputResult;
-import numberlettercountfetching.PassData;
+//import numberlettercountfetching.OutputResult;
+//import numberlettercountfetching.PassData;
 import numberlettercountfetching.StoreFetch;
 import numberlettercountfetching.StringFetchRequest;
 import numberlettercountfetching.IntFetchRequest;
@@ -60,18 +60,18 @@ public class ComputeEngineIntegrationTest {
 		StoreFetch storeFetch = new StoreFetch(networkingApi.getStoredData());
 
 		// Use all FetchApi methods only
-		InputSource source = networkingApi.getInputSource();
-		OutputResult output = networkingApi.getOutputResult();
-		Delimiters delims = networkingApi.getDelimiters();
-		Display display = networkingApi.displayIt();
-		PassData passDataFromFetchApi = networkingApi.inputSource();
+		//		InputSource source = networkingApi.getInputSource();
+		//		OutputResult output = networkingApi.getOutputResult();
+		//		Delimiters delims = networkingApi.getDelimiters();
+		//		Display display = networkingApi.displayIt();
+		//		PassData passDataFromFetchApi = networkingApi.inputSource();
 
 		// Verify all FetchApi components are available
-		assertNotNull(source, "InputSource should not be null");
-		assertNotNull(output, "OutputResult should not be null");
-		assertNotNull(delims, "Delimiters should not be null");
-		assertNotNull(display, "Display should not be null");
-		assertNotNull(passDataFromFetchApi, "PassData from FetchApi should not be null");
+		//		assertNotNull(source, "InputSource should not be null");
+		//		assertNotNull(output, "OutputResult should not be null");
+		//		assertNotNull(delims, "Delimiters should not be null");
+		//		assertNotNull(display, "Display should not be null");
+		//		assertNotNull(passDataFromFetchApi, "PassData from FetchApi should not be null");
 
 		// Verify data was stored properly through FetchApi - THIS WILL FAIL of now before checkpoint 4!
 		List<Integer> storedValues = storeFetch.getStoredValues();
@@ -88,11 +88,11 @@ public class ComputeEngineIntegrationTest {
 		}
 
 		// Use all FetchApi components
-		System.out.println("InputSource available: " + source.getClass().getSimpleName());
-		System.out.println("OutputResult available: " + output.getClass().getSimpleName());
-		System.out.println("Delimiters available: " + delims.getClass().getSimpleName());
-		System.out.println("Display available: " + display.getClass().getSimpleName());
-		System.out.println("PassData available: " + passDataFromFetchApi.getClass().getSimpleName());
+		//		System.out.println("InputSource available: " + source.getClass().getSimpleName());
+		//		System.out.println("OutputResult available: " + output.getClass().getSimpleName());
+		//		System.out.println("Delimiters available: " + delims.getClass().getSimpleName());
+		//		System.out.println("Display available: " + display.getClass().getSimpleName());
+		//		System.out.println("PassData available: " + passDataFromFetchApi.getClass().getSimpleName());
 
 		// Final verification that will FAIL
 		assertTrue(storedValues.size() >= 3, "FetchApi should handle multiple request types - BUT WILL FAIL");

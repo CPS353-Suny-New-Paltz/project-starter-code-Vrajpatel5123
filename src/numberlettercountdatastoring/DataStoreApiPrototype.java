@@ -13,38 +13,38 @@ public class DataStoreApiPrototype {
 		int result = dataapi.insertRequest(request);
 		System.out.println("Insert request result: " + result);
 
-		// Test serialization
-		Serialize serialized = dataapi.serializingData();
-		System.out.println("Serialized: " + serialized);
-
-		// Test formatting
-		FormatData formatted = dataapi.formatData();
-		System.out.println("Formatted: " + formatted);
-
-		// Test results
-		ResultOfCountLetter countResult = dataapi.result();
-		System.out.println("Count result: " + countResult);
-
-		// Test sending
-		SendInfo sent = dataapi.sentData();
-		System.out.println("Sent: " + sent);
-
-		// Test receiving
-		RecieveInfo received = dataapi.recieveData();
-		System.out.println("Received: " + received);
+		//		// Test serialization
+		//		Serialize serialized = dataapi.serializingData();
+		//		System.out.println("Serialized: " + serialized);
+		//
+		//		// Test formatting
+		//		FormatData formatted = dataapi.formatData();
+		//		System.out.println("Formatted: " + formatted);
+		//
+		//		// Test results
+		//		ResultOfCountLetter countResult = dataapi.result();
+		//		System.out.println("Count result: " + countResult);
+		//
+		//		// Test sending
+		//		SendInfo sent = dataapi.sentData();
+		//		System.out.println("Sent: " + sent);
+		//
+		//		// Test receiving
+		//		RecieveInfo received = dataapi.recieveData();
+		//		System.out.println("Received: " + received);
 
 		// Test additional methods
-		boolean stored = dataapi.storeData("test data", "test_location");
-		System.out.println("Data stored: " + stored);
-
-		String readData = dataapi.readData("test_source");
-		System.out.println("Data read: " + readData);
-
-		boolean initialized = dataapi.initializeStorage();
-		System.out.println("Storage initialized: " + initialized);
-
-		boolean valid = dataapi.validateData("valid data");
-		System.out.println("Data valid: " + valid);
+		//		boolean stored = dataapi.storeData("test data", "test_location");
+		//		System.out.println("Data stored: " + stored);
+		//
+		//		String readData = dataapi.readData("test_source");
+		//		System.out.println("Data read: " + readData);
+		//
+		//		boolean initialized = dataapi.initializeStorage();
+		//		System.out.println("Storage initialized: " + initialized);
+		//
+		//		boolean valid = dataapi.validateData("valid data");
+		//		System.out.println("Data valid: " + valid);
 
 		System.out.println("=== DataStore API Prototype Demo Complete ===");
 	}

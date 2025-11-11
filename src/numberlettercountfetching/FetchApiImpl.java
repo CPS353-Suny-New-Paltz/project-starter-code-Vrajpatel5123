@@ -8,48 +8,63 @@ import numberlettercountdatastoring.DataStoreApi;
 public class FetchApiImpl implements FetchApi {
 	private DataStoreApi dataStoreApi;
 	private List<Integer> storedData = new ArrayList<>();
-	private InputSource inputSource = new InputSource();
-	private OutputResult outputResult = new OutputResult();
-	private Delimiters delimiters = new Delimiters();
-	private Display display = new Display();
+	//	private InputSource inputSource = new InputSource();
+	//	private OutputResult outputResult = new OutputResult();
+	//	private Delimiters delimiters = new Delimiters();
+	//	private Display display = new Display();
 
 	public void setDataStoreApi(DataStoreApi dataStoreApi) {
 		this.dataStoreApi = dataStoreApi;
 	}
 
-	@Override
+
 	public List<Integer> insertRequest(FetchRequest fetchRequest) {
 		if (fetchRequest != null && fetchRequest.getData() != null) {
 			storedData.addAll(fetchRequest.getData());
-			return fetchRequest.getData(); // Return the inserted data
+			return new ArrayList<>(fetchRequest.getData());
 		}
-		return List.of(-1); // failure value
+		return List.of(-1);
 	}
 
-	@Override
-	public InputSource getInputSource() {
-		return inputSource;
+
+	public List<Integer> fetchAllData() {
+		return new ArrayList<>(storedData);
 	}
 
-	@Override
-	public OutputResult getOutputResult() {
-		return outputResult;
+
+	public void processRequest() {
+		System.out.println("Processing fetch request");
 	}
 
-	@Override
-	public Delimiters getDelimiters() {
-		return delimiters;
+
+	public boolean validateNumber(int number) {
+		return number >= 0;
 	}
 
-	@Override
-	public PassData inputSource() {
-		return new PassData(); // Return actual object instead of null
-	}
-
-	@Override
-	public Display displayIt() {
-		return display;
-	}
+	//	@Override
+	//	public InputSource getInputSource() {
+	//		return inputSource;
+	//	}
+	//
+	//	@Override
+	//	public OutputResult getOutputResult() {
+	//		return outputResult;
+	//	}
+	//
+	//	@Override
+	//	public Delimiters getDelimiters() {
+	//		return delimiters;
+	//	}
+	//
+	//	@Override
+	//	public PassData inputSource() {
+	//		return new PassData(); // Return actual object instead of null
+	//	}
+	//
+	//	@Override
+	//	public Display displayIt() {
+	//		return display;
+	//	}
 
 	// Helper method to get stored data
 	public List<Integer> getStoredData() {
