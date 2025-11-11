@@ -1,4 +1,5 @@
 package numberlettercountcomputing;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -10,9 +11,7 @@ public class ComputingApiImpl implements ComputingApi {
 	private FetchApi fetchApi;
 	private DataStoreApi dataStoreApi;
 
-	public ComputingApiImpl() {
-		// No-argument constructor
-	}
+	public ComputingApiImpl() {}
 
 	public ComputingApiImpl(FetchApi fetchApi, DataStoreApi dataStoreApi) {
 		this.fetchApi = fetchApi;
@@ -28,21 +27,19 @@ public class ComputingApiImpl implements ComputingApi {
 	}
 
 	public String initalize(List<Integer> inputData) {
-		// USE fetchApi: If inputData is null, try to fetch data
 		if (inputData == null && fetchApi != null) {
-			//			inputData = fetchApi.fetchData();
+			inputData = fetchApi.fetchAllData();
 		}
 
 		if (inputData == null || inputData.isEmpty()) {
 			return "";
 		}
 
-		// USE dataStoreApi: Store the input data
+		// Process data storage request
 		if (dataStoreApi != null) {
-			//			dataStoreApi.storeInputData(inputData);
+			dataStoreApi.processRequest();
 		}
 
-		// Rest of your existing code...
 		Extract extract = extractData();
 		System.out.println("Extracting data: " + extract);
 
@@ -68,19 +65,17 @@ public class ComputingApiImpl implements ComputingApi {
 		processData.setOutputData(result.toString());
 		System.out.println("Processing data: " + processData);
 
-		// USE dataStoreApi: Store the result
-		if (dataStoreApi != null) {
-			//			dataStoreApi.storeResult(result.toString());
-		}
-
 		return result.toString();
 	}
 
 	public List<Integer> compute() {
-		// USE fetchApi: Get data to compute
 		List<Integer> dataToCompute = null;
 		if (fetchApi != null) {
-			//			dataToCompute = fetchApi.fetchData();
+			dataToCompute = fetchApi.fetchAllData();
+		}
+
+		if (dataToCompute == null && dataStoreApi != null) {
+			dataToCompute = dataStoreApi.fetchAllData();
 		}
 
 		if (dataToCompute == null) {
@@ -91,20 +86,10 @@ public class ComputingApiImpl implements ComputingApi {
 		passData.setData("Computing number to word conversion");
 		System.out.println("Passing data: " + passData);
 
-		// USE dataStoreApi: Store computation result
-		if (dataStoreApi != null) {
-			//			dataStoreApi.storeComputation(dataToCompute);
-		}
-
 		return dataToCompute;
 	}
 
 	public String writeResult(String result, String delimiters) {
-		// USE dataStoreApi: Write the final result
-		if (dataStoreApi != null) {
-			//			dataStoreApi.writeFinalResult(result, delimiters);
-		}
-
 		SendInfo sendInfo = sendInfo();
 		sendInfo.setData(result);
 		sendInfo.setDestination("output");
@@ -116,9 +101,10 @@ public class ComputingApiImpl implements ComputingApi {
 	public void insertRequest() {
 		System.out.println("Insert request processed");
 
-		// USE fetchApi: Process the insert request
-		if (fetchApi != null) {
-			//			fetchApi.processRequest();
+		// Process data storage request
+		if (dataStoreApi != null) {
+			boolean processed = dataStoreApi.processRequest();
+			System.out.println("Data storage request processed: " + processed);
 		}
 
 		Extract extract = extractData();
@@ -135,11 +121,6 @@ public class ComputingApiImpl implements ComputingApi {
 		passData.setToComponent("storage");
 		System.out.println("Passing: " + passData);
 
-		// USE dataStoreApi: Initialize storage for the request
-		if (dataStoreApi != null) {
-			//			dataStoreApi.initializeForRequest();
-		}
-
 		SendInfo sendInfo = sendInfo();
 		sendInfo.setDestination("client");
 		System.out.println("Sending: " + sendInfo);
@@ -149,7 +130,6 @@ public class ComputingApiImpl implements ComputingApi {
 		System.out.println("Receiving: " + recieveInfo);
 	}
 
-	// Rest of your methods remain the same...
 	public Extract extractData() {
 		Extract extract = new Extract();
 		extract.setExtractionMethod("number parsing");
@@ -201,11 +181,6 @@ public class ComputingApiImpl implements ComputingApi {
 			}
 		}
 
-		// USE dataStoreApi: Store processed pass data
-		if (dataStoreApi != null) {
-			//			dataStoreApi.storeProcessedPassData(resultList);
-		}
-
 		return resultList;
 	}
 
@@ -227,16 +202,18 @@ public class ComputingApiImpl implements ComputingApi {
 
 		System.out.println("Created PassData for number " + number + ": " + passData);
 
-		// USE both APIs: Validate and store the pass data
 		if (fetchApi != null) {
-			//			boolean isValid = fetchApi.validateNumber(number);
-			//			if (!isValid) {
-			//				passData.setData("INVALID: " + word);
-			//			}
+			boolean isValid = fetchApi.validateNumber(number);
+			if (!isValid) {
+				passData.setData("INVALID: " + word);
+			}
 		}
 
 		if (dataStoreApi != null) {
-			//			dataStoreApi.storeNumberPassData(passData);
+			boolean isValid = dataStoreApi.validateNumber(number);
+			if (!isValid) {
+				passData.setData("INVALID_DATASTORE: " + word);
+			}
 		}
 
 		return passData;

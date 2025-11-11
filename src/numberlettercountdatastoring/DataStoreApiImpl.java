@@ -1,9 +1,14 @@
+// File: DataStoreApiImpl.java (FIXED - uses only available ComputingApi methods)
 package numberlettercountdatastoring;
 
+import java.util.ArrayList;
+import java.util.List;
 import numberlettercountcomputing.ComputingApi;
+import numberlettercountcomputing.PassData;
 
 public class DataStoreApiImpl implements DataStoreApi {
 	private ComputingApi computingApi;
+	private List<Integer> storedNumbers = new ArrayList<>();
 
 	public DataStoreApiImpl() {}
 
@@ -23,111 +28,138 @@ public class DataStoreApiImpl implements DataStoreApi {
 
 		System.out.println("Processing data request: " + dataRequest);
 
-		// Store the data and return success code
-		boolean stored = storeData(dataRequest.getDataContent(), "storage_location_" + dataRequest.getRequestId());
+		// Extract numbers from data request and store them
+		try {
+			String[] numberStrings = dataRequest.getDataContent().split(",");
+			for (String numStr : numberStrings) {
+				int number = Integer.parseInt(numStr.trim());
+				storedNumbers.add(number);
 
-		return stored ? 0 : -1; // 0 for success, -1 for failure
+				// USE computingApi: Process the number using available methods
+				if (computingApi != null) {
+					PassData passData = computingApi.passData(number);
+					System.out.println("Created PassData for number " + number + ": " + passData);
+
+					List<Integer> processedResults = computingApi.processPassData(passData);
+					System.out.println("Processed results: " + processedResults);
+				}
+			}
+			return 0; // success
+		} catch (Exception e) {
+			return -1; // failure
+		}
 	}
 
 
-	public Serialize serializingData() {
-		Serialize serialize = new Serialize();
-		serialize.setData("Sample serialized data");
-		serialize.setSerializationFormat("json");
-		serialize.setCompressed(false);
+	public List<Integer> fetchAllData() {
+		// USE computingApi: Process the stored numbers before returning
+		if (computingApi != null && !storedNumbers.isEmpty()) {
+			System.out.println("Processing stored data with ComputingApi");
 
-		System.out.println("Serializing data: " + serialize);
-		return serialize;
-	}
+			// Create a PassData object with all stored numbers
+			PassData bulkPassData = new PassData();
+			StringBuilder dataBuilder = new StringBuilder();
+			for (Integer num : storedNumbers) {
+				if (dataBuilder.length() > 0) {
+					dataBuilder.append(",");
+				}
+				dataBuilder.append(num);
+			}
+			bulkPassData.setData(dataBuilder.toString());
+			bulkPassData.setFromComponent("DataStore");
+			bulkPassData.setToComponent("Client");
 
-
-	public FormatData formatData() {
-		FormatData format = new FormatData();
-		format.setFormatType("text");
-
-		Delimiters delimiters = new Delimiters();
-		delimiters.setFieldDelimiter(",");
-		delimiters.setRecordDelimiter("\n");
-		delimiters.setOutputDelimiter(" ");
-
-		format.setDelimiters(delimiters);
-		format.setIncludeSpaces(true);
-		format.setCapitalizeWords(false);
-
-		System.out.println("Formatting data: " + format);
-		return format;
-	}
-
-
-	public ResultOfCountLetter result() {
-		ResultOfCountLetter result = new ResultOfCountLetter();
-		result.setLetterCount(42); // Example count
-		result.setOriginalData("sample input data");
-		result.setProcessedData("sample processed output");
-
-		System.out.println("Returning result: " + result);
-		return result;
-	}
-
-
-	public SendInfo sentData() {
-		SendInfo sendInfo = new SendInfo();
-		sendInfo.setData("Data to be sent");
-		sendInfo.setDestination("output_file.txt");
-		sendInfo.setSendMethod("file");
-
-		System.out.println("Sending data: " + sendInfo);
-		return sendInfo;
-	}
-
-
-	public RecieveInfo recieveData() {
-		RecieveInfo receiveInfo = new RecieveInfo();
-		receiveInfo.setData("Received data content");
-		receiveInfo.setSource("input_file.txt");
-		receiveInfo.setReceiveMethod("file");
-
-		System.out.println("Receiving data: " + receiveInfo);
-		return receiveInfo;
-	}
-
-
-	public boolean storeData(String data, String location) {
-		if (data == null || location == null) {
-			return false;
+			List<Integer> processingResults = computingApi.processPassData(bulkPassData);
+			System.out.println("Bulk processing results: " + processingResults);
 		}
 
-		System.out.println("Storing data '" + data + "' at location: " + location);
-		// Simulate successful storage
-		return true;
+		return new ArrayList<>(storedNumbers);
 	}
 
 
-	public String readData(String source) {
-		if (source == null) {
-			return "";
+	public boolean validateNumber(int number) {
+		// USE computingApi: Use computing API for validation
+		boolean basicValidation = number >= 0;
+		if (computingApi != null) {
+			try {
+				// Create PassData and process it to validate
+				PassData validationPassData = computingApi.passData(number);
+				List<Integer> validationResults = computingApi.processPassData(validationPassData);
+
+				// If processing succeeds and returns results, consider it valid
+				return basicValidation && validationResults != null && !validationResults.isEmpty();
+			} catch (Exception e) {
+				return false;
+			}
+		}
+		return basicValidation;
+	}
+
+
+	public boolean processRequest() {
+		System.out.println("Processing data storage request");
+
+		// USE computingApi: Process all stored numbers
+		if (computingApi != null && !storedNumbers.isEmpty()) {
+			System.out.println("Processing " + storedNumbers.size() + " numbers with ComputingApi");
+
+			// Process each number individually
+			for (Integer number : storedNumbers) {
+				PassData passData = computingApi.passData(number);
+				List<Integer> results = computingApi.processPassData(passData);
+				System.out.println("Number " + number + " processed with results: " + results);
+			}
+
+			// Also process as a batch
+			PassData batchPassData = new PassData();
+			batchPassData.setData("Batch processing of " + storedNumbers.size() + " numbers");
+			batchPassData.setFromComponent("DataStore");
+			batchPassData.setToComponent("BatchProcessor");
+
+			List<Integer> batchResults = computingApi.processPassData(batchPassData);
+			System.out.println("Batch processing completed with " + batchResults.size() + " results");
 		}
 
-		System.out.println("Reading data from source: " + source);
-		// Simulate reading data
-		return "Sample data from " + source;
+		return !storedNumbers.isEmpty();
 	}
 
-
-	public boolean initializeStorage() {
-		System.out.println("Initializing data storage");
-		// Simulate successful initialization
-		return true;
+	// Help method that uses computingApi
+	public List<Integer> processAllNumbers() {
+		if (computingApi != null && !storedNumbers.isEmpty()) {
+			List<Integer> allResults = new ArrayList<>();
+			for (Integer number : storedNumbers) {
+				PassData passData = computingApi.passData(number);
+				List<Integer> results = computingApi.processPassData(passData);
+				allResults.addAll(results);
+			}
+			return allResults;
+		}
+		return new ArrayList<>();
 	}
 
+	// help method to get stored data count
+	public int getStoredDataCount() {
+		return storedNumbers.size();
+	}
 
-	public boolean validateData(String data) {
-		if (data == null || data.trim().isEmpty()) {
-			return false;
+	// Help method to clear storage using computingApi notification
+	public boolean clearStorage() {
+		int previousSize = storedNumbers.size();
+		if (previousSize > 0) {
+			// USE computingApi: Notify about storage clearance
+			if (computingApi != null) {
+				PassData clearancePassData = new PassData();
+				clearancePassData.setData("Clearing " + previousSize + " items from storage");
+				clearancePassData.setFromComponent("DataStore");
+				clearancePassData.setToComponent("Cleanup");
+
+				List<Integer> clearanceResults = computingApi.processPassData(clearancePassData);
+				System.out.println("Storage clearance processed with results: " + clearanceResults);
+			}
+
+			storedNumbers.clear();
 		}
 
-		System.out.println("Validating data: " + data);
-		// Simple validation - data should not be empty
-		return !data.trim().isEmpty();
+		return previousSize > 0;
 	}
 }
