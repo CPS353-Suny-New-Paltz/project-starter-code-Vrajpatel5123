@@ -44,11 +44,42 @@ public class ComputingApiImpl implements ComputingApi {
 	}
 
 	public String initalize(List<Integer> inputData) {
+<<<<<<< HEAD
 		try {
 			// Parameter validation
 			if (inputData == null && fetchApi != null) {
 				logger.info("Input data is null, attempting to fetch from FetchApi");
 				inputData = fetchApi.fetchAllData();
+=======
+		//		if (inputData == null && fetchApi != null) {
+		//			inputData = fetchApi.fetchAllData();
+		//		}
+
+		if (inputData == null || inputData.isEmpty()) {
+			return "";
+		}
+
+		// Process data storage request
+		//		if (dataStoreApi != null) {
+		//			dataStoreApi.processRequest();
+		//		}
+
+		Extract extract = extractData();
+		System.out.println("Extracting data: " + extract);
+
+		ProcessData processData = processData();
+		processData.setInputData(inputData.toString());
+
+		String[] numberWords = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+
+		StringBuilder result = new StringBuilder();
+		for (int i = 0; i < inputData.size(); i++) {
+			int num = inputData.get(i);
+			if (num >= 0 && num <= 9) {
+				result.append(numberWords[num]);
+			} else {
+				result.append(num);
+>>>>>>> main
 			}
 
 			if (inputData == null || inputData.isEmpty()) {
@@ -110,6 +141,7 @@ public class ComputingApiImpl implements ComputingApi {
 	}
 
 	public List<Integer> compute() {
+<<<<<<< HEAD
 		try {
 			List<Integer> dataToCompute = null;
 
@@ -152,6 +184,26 @@ public class ComputingApiImpl implements ComputingApi {
 			logger.severe("Unexpected error in compute method: " + e.getMessage());
 			return Arrays.asList(-1); // Sentinel value for error
 		}
+=======
+		List<Integer> dataToCompute = null;
+		//		if (fetchApi != null) {
+		//			dataToCompute = fetchApi.fetchAllData();
+		//		}
+
+		//		if (dataToCompute == null && dataStoreApi != null) {
+		//			dataToCompute = dataStoreApi.fetchAllData();
+		//		}
+
+		if (dataToCompute == null) {
+			dataToCompute = Arrays.asList(1, 2, 3);
+		}
+
+		PassData passData = passData();
+		passData.setData("Computing number to word conversion");
+		System.out.println("Passing data: " + passData);
+
+		return dataToCompute;
+>>>>>>> main
 	}
 
 	public String writeResult(String result, String delimiters) {
@@ -186,6 +238,7 @@ public class ComputingApiImpl implements ComputingApi {
 		try {
 			logger.info("Insert request processed");
 
+<<<<<<< HEAD
 			// Process data storage request with error handling
 			if (dataStoreApi != null) {
 				try {
@@ -222,6 +275,35 @@ public class ComputingApiImpl implements ComputingApi {
 			logger.severe("Unexpected error in insertRequest method: " + e.getMessage());
 			// Void method - exception is logged but not propagated
 		}
+=======
+		//		// Process data storage request
+		//		if (dataStoreApi != null) {
+		//			boolean processed = dataStoreApi.processRequest();
+		//			System.out.println("Data storage request processed: " + processed);
+		//		}
+
+		Extract extract = extractData();
+		extract.setSource("user input");
+		extract.setExtractedData("number data");
+		System.out.println("Extracted: " + extract);
+
+		ProcessData processData = processData();
+		processData.setProcessingType("number conversion");
+		System.out.println("Processing: " + processData);
+
+		PassData passData = passData();
+		passData.setFromComponent("compute");
+		passData.setToComponent("storage");
+		System.out.println("Passing: " + passData);
+
+		SendInfo sendInfo = sendInfo();
+		sendInfo.setDestination("client");
+		System.out.println("Sending: " + sendInfo);
+
+		RecieveInfo recieveInfo = recieveInfo();
+		recieveInfo.setSource("external system");
+		System.out.println("Receiving: " + recieveInfo);
+>>>>>>> main
 	}
 
 	public Extract extractData() {

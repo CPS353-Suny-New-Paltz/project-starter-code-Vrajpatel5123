@@ -20,6 +20,6 @@ public interface FetchApi {
 	//	
 	//	Display displayIt();
 
-	List<Integer> fetchAllData();
+	//	List<Integer> fetchAllData();
 	boolean validateNumber(int number);
 }
