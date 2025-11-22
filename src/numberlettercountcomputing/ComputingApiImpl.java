@@ -27,18 +27,18 @@ public class ComputingApiImpl implements ComputingApi {
 	}
 
 	public String initalize(List<Integer> inputData) {
-		if (inputData == null && fetchApi != null) {
-			inputData = fetchApi.fetchAllData();
-		}
+		//		if (inputData == null && fetchApi != null) {
+		//			inputData = fetchApi.fetchAllData();
+		//		}
 
 		if (inputData == null || inputData.isEmpty()) {
 			return "";
 		}
 
 		// Process data storage request
-		if (dataStoreApi != null) {
-			dataStoreApi.processRequest();
-		}
+		//		if (dataStoreApi != null) {
+		//			dataStoreApi.processRequest();
+		//		}
 
 		Extract extract = extractData();
 		System.out.println("Extracting data: " + extract);
@@ -70,13 +70,13 @@ public class ComputingApiImpl implements ComputingApi {
 
 	public List<Integer> compute() {
 		List<Integer> dataToCompute = null;
-		if (fetchApi != null) {
-			dataToCompute = fetchApi.fetchAllData();
-		}
+		//		if (fetchApi != null) {
+		//			dataToCompute = fetchApi.fetchAllData();
+		//		}
 
-		if (dataToCompute == null && dataStoreApi != null) {
-			dataToCompute = dataStoreApi.fetchAllData();
-		}
+		//		if (dataToCompute == null && dataStoreApi != null) {
+		//			dataToCompute = dataStoreApi.fetchAllData();
+		//		}
 
 		if (dataToCompute == null) {
 			dataToCompute = Arrays.asList(1, 2, 3);
@@ -101,11 +101,11 @@ public class ComputingApiImpl implements ComputingApi {
 	public void insertRequest() {
 		System.out.println("Insert request processed");
 
-		// Process data storage request
-		if (dataStoreApi != null) {
-			boolean processed = dataStoreApi.processRequest();
-			System.out.println("Data storage request processed: " + processed);
-		}
+		//		// Process data storage request
+		//		if (dataStoreApi != null) {
+		//			boolean processed = dataStoreApi.processRequest();
+		//			System.out.println("Data storage request processed: " + processed);
+		//		}
 
 		Extract extract = extractData();
 		extract.setSource("user input");

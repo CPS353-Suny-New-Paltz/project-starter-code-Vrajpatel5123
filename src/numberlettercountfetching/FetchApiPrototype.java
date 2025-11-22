@@ -1,7 +1,7 @@
 package numberlettercountfetching;
 
 import java.util.Arrays;
-import java.util.List;
+
 
 import project.annotations.NetworkAPIPrototype;
 
@@ -16,9 +16,9 @@ public class FetchApiPrototype {
 		fetchapi.insertRequest(new StringFetchRequest("hello"));
 		fetchapi.insertRequest(new ListFetchRequest(Arrays.asList(1, 2, 3)));
 
-		// Uses the actual methods
-		List<Integer> allData = fetchapi.fetchAllData();
-		System.out.println("Fetched data: " + allData);
+
+		//		List<Integer> allData = fetchapi.fetchAllData();
+		//		System.out.println("Fetched data: " + allData);
 
 		boolean isValid = fetchapi.validateNumber(5);
 		System.out.println("Number validation: " + isValid);
