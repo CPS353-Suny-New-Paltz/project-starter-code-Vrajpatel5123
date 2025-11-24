@@ -12,30 +12,24 @@ public class DataStoreApiImpl implements DataStoreApi {
 	private List<Integer> storedNumbers = new ArrayList<>();
 
 	public DataStoreApiImpl() {
-		logger.info("DataStoreApiImpl initialized without ComputingApi dependency");
+		logger.info("DataStoreApiImpl created");
 	}
 
 	public DataStoreApiImpl(ComputingApi computingApi) {
-		// Validation for constructor parameter
-		if (computingApi == null) {
-			logger.warning("ComputingApi dependency is null - some features may not work");
-		}
 		this.computingApi = computingApi;
-		logger.info("DataStoreApiImpl initialized with ComputingApi dependency");
+		logger.info("DataStoreApiImpl created with ComputingApi");
 	}
 
 	public void setComputingApi(ComputingApi computingApi) {
-		// No validation needed - null is acceptable (dependency might be optional)
 		this.computingApi = computingApi;
-		logger.info("ComputingApi dependency set");
 	}
 
 	public int insertRequest(DataRequest dataRequest) {
 		try {
-			// Parameter validation
+			// Validate parameter
 			if (dataRequest == null) {
-				logger.warning("DataRequest parameter is null");
-				return -1; // failure code
+				logger.warning("DataRequest is null");
+				return -1; // Error code
 			}
 
 			if (dataRequest.getRequestId() < 0) {
@@ -43,68 +37,71 @@ public class DataStoreApiImpl implements DataStoreApi {
 				return -1;
 			}
 
-			logger.info("Processing data request: " + dataRequest);
-
-			// Extract numbers from data request and store them
-			try {
-				String dataContent = dataRequest.getDataContent();
-				if (dataContent == null || dataContent.trim().isEmpty()) {
-					logger.warning("Data content is null or empty");
-					return -1;
-				}
-
-				String[] numberStrings = dataContent.split(",");
-				for (String numStr : numberStrings) {
-					try {
-						int number = Integer.parseInt(numStr.trim());
-
-						// Validate number before storing
-						if (number < 0) {
-							logger.warning("Skipping negative number: " + number);
-							continue;
-						}
-
-						storedNumbers.add(number);
-						logger.fine("Stored number: " + number);
-
-						// USE computingApi: Process the number using available methods
-						if (computingApi != null) {
-							try {
-								PassData passData = computingApi.passData(number);
-								logger.info("Created PassData for number " + number + ": " + passData);
-
-								List<Integer> processedResults = computingApi.processPassData(passData);
-								logger.info("Processed results: " + processedResults);
-							} catch (Exception e) {
-								logger.warning("ComputingApi processing failed for number " + number + ": " + e.getMessage());
-							}
-						}
-					} catch (NumberFormatException e) {
-						logger.warning("Invalid number format in data content: '" + numStr + "'");
-						// Continue processing other numbers
-					}
-				}
-				return 0; // success
-			} catch (Exception e) {
-				logger.severe("Error processing data request content: " + e.getMessage());
+			String dataContent = dataRequest.getDataContent();
+			if (dataContent == null || dataContent.trim().isEmpty()) {
+				logger.warning("Data content is empty");
 				return -1;
 			}
+
+			logger.info("Processing data request: " + dataRequest);
+
+			// Process the data content
+			String[] numberStrings = dataContent.split(",");
+			int storedCount = 0;
+
+			for (String numStr : numberStrings) {
+				try {
+					int number = Integer.parseInt(numStr.trim());
+
+					// Validate number
+					if (number < 0) {
+						logger.warning("Skipping negative number: " + number);
+						continue;
+					}
+
+					storedNumbers.add(number);
+					storedCount++;
+					logger.info("Stored number: " + number);
+
+					// Process with ComputingApi if available
+					if (computingApi != null) {
+						try {
+							PassData passData = computingApi.passData(number);
+							List<Integer> processedResults = computingApi.processPassData(passData);
+							logger.info("Processed number " + number + " with results: " + processedResults);
+						} catch (Exception e) {
+							logger.warning("ComputingApi processing failed for number " + number + ": " + e.getMessage());
+						}
+					}
+
+				} catch (NumberFormatException e) {
+					logger.warning("Invalid number format: '" + numStr + "'");
+					// Continue with next number
+				}
+			}
+
+			if (storedCount == 0) {
+				logger.warning("No valid numbers stored from request");
+				return -1;
+			}
+
+			logger.info("Successfully stored " + storedCount + " numbers");
+			return 0; // Success code
+
 		} catch (Exception e) {
-			logger.severe("Unexpected error in insertRequest method: " + e.getMessage());
-			return -1;
+			logger.severe("Error in insertRequest: " + e.getMessage());
+			return -1; // Error code
 		}
 	}
 
 	public List<Integer> fetchAllData() {
 		try {
-			logger.info("Fetching all stored data, count: " + storedNumbers.size());
+			logger.info("Fetching " + storedNumbers.size() + " stored numbers");
 
-			// USE computingApi: Process the stored numbers before returning
+			// Process with ComputingApi if available
 			if (computingApi != null && !storedNumbers.isEmpty()) {
-				logger.info("Processing stored data with ComputingApi");
-
 				try {
-					// Create a PassData object with all stored numbers
+					// Create batch data for processing
 					PassData bulkPassData = new PassData();
 					StringBuilder dataBuilder = new StringBuilder();
 					for (Integer num : storedNumbers) {
@@ -118,17 +115,16 @@ public class DataStoreApiImpl implements DataStoreApi {
 					bulkPassData.setToComponent("Client");
 
 					List<Integer> processingResults = computingApi.processPassData(bulkPassData);
-					logger.info("Bulk processing results: " + processingResults);
+					logger.info("Bulk processing completed with " + processingResults.size() + " results");
 				} catch (Exception e) {
-					logger.warning("Bulk processing with ComputingApi failed: " + e.getMessage());
+					logger.warning("Bulk processing failed: " + e.getMessage());
 				}
 			}
 
-			// Return defensive copy
-			return new ArrayList<>(storedNumbers);
+			return new ArrayList<>(storedNumbers); // Return copy
 
 		} catch (Exception e) {
-			logger.severe("Unexpected error in fetchAllData method: " + e.getMessage());
+			logger.severe("Error in fetchAllData: " + e.getMessage());
 			return new ArrayList<>(); // Return empty list on error
 		}
 	}
@@ -136,62 +132,62 @@ public class DataStoreApiImpl implements DataStoreApi {
 	public boolean validateNumber(int number) {
 		try {
 			// Basic validation
-			boolean basicValidation = number >= 0;
-			if (!basicValidation) {
-				logger.warning("Number validation failed - negative number: " + number);
+			if (number < 0) {
+				logger.warning("Negative number invalid: " + number);
 				return false;
 			}
 
-			// USE computingApi: Use computing API for additional validation
+			// Additional validation with ComputingApi if available
 			if (computingApi != null) {
 				try {
-					// Create PassData and process it to validate
 					PassData validationPassData = computingApi.passData(number);
 					List<Integer> validationResults = computingApi.processPassData(validationPassData);
 
-					// If processing succeeds and returns results, consider it valid
-					boolean computingValidation = validationResults != null && !validationResults.isEmpty();
-					logger.info("ComputingApi validation result for " + number + ": " + computingValidation);
+					boolean isValid = validationResults != null && !validationResults.isEmpty();
+					logger.info("ComputingApi validation for " + number + ": " + isValid);
+					return isValid;
 
-					return computingValidation;
 				} catch (Exception e) {
-					logger.warning("ComputingApi validation failed for number " + number + ": " + e.getMessage());
+					logger.warning("ComputingApi validation failed: " + e.getMessage());
 					// Fall back to basic validation
-					return basicValidation;
 				}
 			}
 
-			return basicValidation;
+			logger.info("Basic validation for " + number + ": true");
+			return true; // Basic validation passed
 
 		} catch (Exception e) {
-			logger.severe("Unexpected error in validateNumber method: " + e.getMessage());
+			logger.severe("Error in validateNumber: " + e.getMessage());
 			return false; // Default to invalid on error
 		}
 	}
 
 	public boolean processRequest() {
 		try {
-			logger.info("Processing data storage request, stored items: " + storedNumbers.size());
+			logger.info("Processing data storage request with " + storedNumbers.size() + " items");
 
-			// USE computingApi: Process all stored numbers
-			if (computingApi != null && !storedNumbers.isEmpty()) {
-				logger.info("Processing " + storedNumbers.size() + " numbers with ComputingApi");
+			if (storedNumbers.isEmpty()) {
+				logger.warning("No data to process");
+				return false;
+			}
 
+			// Process with ComputingApi if available
+			if (computingApi != null) {
 				// Process each number individually
 				for (Integer number : storedNumbers) {
 					try {
 						PassData passData = computingApi.passData(number);
 						List<Integer> results = computingApi.processPassData(passData);
-						logger.info("Number " + number + " processed with results: " + results);
+						logger.info("Processed number " + number + " with " + results.size() + " results");
 					} catch (Exception e) {
 						logger.warning("Failed to process number " + number + ": " + e.getMessage());
 					}
 				}
 
-				// Also process as a batch
+				// Process as batch
 				try {
 					PassData batchPassData = new PassData();
-					batchPassData.setData("Batch processing of " + storedNumbers.size() + " numbers");
+					batchPassData.setData("Batch of " + storedNumbers.size() + " numbers");
 					batchPassData.setFromComponent("DataStore");
 					batchPassData.setToComponent("BatchProcessor");
 
@@ -202,17 +198,16 @@ public class DataStoreApiImpl implements DataStoreApi {
 				}
 			}
 
-			boolean success = !storedNumbers.isEmpty();
-			logger.info("Process request completed: " + success);
-			return success;
+			logger.info("Process request completed successfully");
+			return true;
 
 		} catch (Exception e) {
-			logger.severe("Unexpected error in processRequest method: " + e.getMessage());
+			logger.severe("Error in processRequest: " + e.getMessage());
 			return false;
 		}
 	}
 
-	// Helper method that uses computingApi
+	// Helper methods with error handling
 	public List<Integer> processAllNumbers() {
 		try {
 			if (computingApi != null && !storedNumbers.isEmpty()) {
@@ -223,45 +218,43 @@ public class DataStoreApiImpl implements DataStoreApi {
 						List<Integer> results = computingApi.processPassData(passData);
 						allResults.addAll(results);
 					} catch (Exception e) {
-						logger.warning("Failed to process number " + number + " in processAllNumbers: " + e.getMessage());
+						logger.warning("Failed to process number " + number);
 					}
 				}
 				return allResults;
 			}
 			return new ArrayList<>();
 		} catch (Exception e) {
-			logger.severe("Unexpected error in processAllNumbers method: " + e.getMessage());
+			logger.severe("Error in processAllNumbers: " + e.getMessage());
 			return new ArrayList<>();
 		}
 	}
 
-	// Helper method to get stored data count
 	public int getStoredDataCount() {
 		return storedNumbers.size();
 	}
 
-	// Helper method to clear storage using computingApi notification
 	public boolean clearStorage() {
 		try {
 			int previousSize = storedNumbers.size();
 			if (previousSize > 0) {
-				// USE computingApi: Notify about storage clearance
+				// Notify ComputingApi if available
 				if (computingApi != null) {
 					try {
 						PassData clearancePassData = new PassData();
-						clearancePassData.setData("Clearing " + previousSize + " items from storage");
+						clearancePassData.setData("Clearing " + previousSize + " items");
 						clearancePassData.setFromComponent("DataStore");
 						clearancePassData.setToComponent("Cleanup");
 
-						List<Integer> clearanceResults = computingApi.processPassData(clearancePassData);
-						logger.info("Storage clearance processed with results: " + clearanceResults);
+						computingApi.processPassData(clearancePassData);
+						logger.info("Notified ComputingApi about clearance");
 					} catch (Exception e) {
 						logger.warning("Clearance notification failed: " + e.getMessage());
 					}
 				}
 
 				storedNumbers.clear();
-				logger.info("Storage cleared, removed " + previousSize + " items");
+				logger.info("Cleared " + previousSize + " items from storage");
 				return true;
 			}
 
@@ -269,8 +262,18 @@ public class DataStoreApiImpl implements DataStoreApi {
 			return false;
 
 		} catch (Exception e) {
-			logger.severe("Unexpected error in clearStorage method: " + e.getMessage());
+			logger.severe("Error in clearStorage: " + e.getMessage());
 			return false;
 		}
+	}
+
+	// Helper to check if storage is empty
+	public boolean isEmpty() {
+		return storedNumbers.isEmpty();
+	}
+
+	// Helper to get storage info
+	public String getStorageInfo() {
+		return "DataStore contains " + storedNumbers.size() + " numbers";
 	}
 }

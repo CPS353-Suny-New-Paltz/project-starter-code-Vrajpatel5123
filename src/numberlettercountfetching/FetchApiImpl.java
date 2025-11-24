@@ -2,72 +2,108 @@ package numberlettercountfetching;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import numberlettercountdatastoring.DataStoreApi;
 
 public class FetchApiImpl implements FetchApi {
+	private static final Logger logger = Logger.getLogger(FetchApiImpl.class.getName());
 	private DataStoreApi dataStoreApi;
 	private List<Integer> storedData = new ArrayList<>();
-	//	private InputSource inputSource = new InputSource();
-	//	private OutputResult outputResult = new OutputResult();
-	//	private Delimiters delimiters = new Delimiters();
-	//	private Display display = new Display();
 
 	public void setDataStoreApi(DataStoreApi dataStoreApi) {
 		this.dataStoreApi = dataStoreApi;
 	}
 
-
 	public List<Integer> insertRequest(FetchRequest fetchRequest) {
-		if (fetchRequest != null && fetchRequest.getData() != null) {
-			storedData.addAll(fetchRequest.getData());
-			return new ArrayList<>(fetchRequest.getData());
-		}
-		return List.of(-1);
-	}
+		try {
+			// Validate parameter
+			if (fetchRequest == null) {
+				logger.warning("FetchRequest is null");
+				return List.of(-1); // Error indicator
+			}
 
+			List<Integer> data = fetchRequest.getData();
+			if (data == null) {
+				logger.warning("FetchRequest data is null");
+				return List.of(-1);
+			}
+
+			if (data.isEmpty()) {
+				logger.warning("FetchRequest data is empty");
+				return List.of(-1);
+			}
+
+			// Validate each number
+			for (Integer num : data) {
+				if (num == null) {
+					logger.warning("Skipping null number in request");
+					continue;
+				}
+				if (num < 0) {
+					logger.warning("Skipping negative number: " + num);
+					continue;
+				}
+				storedData.add(num);
+				logger.info("Stored number: " + num);
+			}
+
+			return new ArrayList<>(data); // Return copy
+
+		} catch (Exception e) {
+			logger.severe("Error in insertRequest: " + e.getMessage());
+			return List.of(-1); // Error indicator
+		}
+	}
 
 	public List<Integer> fetchAllData() {
-		return new ArrayList<>(storedData);
-	}
+		try {
+			logger.info("Fetching " + storedData.size() + " items");
+			return new ArrayList<>(storedData); // Return copy for safety
 
+		} catch (Exception e) {
+			logger.severe("Error in fetchAllData: " + e.getMessage());
+			return new ArrayList<>(); // Return empty list on error
+		}
+	}
 
 	public void processRequest() {
-		System.out.println("Processing fetch request");
-	}
+		try {
+			logger.info("Processing fetch request with " + storedData.size() + " items");
+			// Processing logic here
 
+		} catch (Exception e) {
+			logger.severe("Error in processRequest: " + e.getMessage());
+			// Void method - just log the error
+		}
+	}
 
 	public boolean validateNumber(int number) {
-		return number >= 0;
-	}
+		try {
+			// Simple validation - numbers must be non-negative
+			boolean isValid = number >= 0;
+			logger.info("Number " + number + " validation: " + isValid);
+			return isValid;
 
-	//	@Override
-	//	public InputSource getInputSource() {
-	//		return inputSource;
-	//	}
-	//
-	//	@Override
-	//	public OutputResult getOutputResult() {
-	//		return outputResult;
-	//	}
-	//
-	//	@Override
-	//	public Delimiters getDelimiters() {
-	//		return delimiters;
-	//	}
-	//
-	//	@Override
-	//	public PassData inputSource() {
-	//		return new PassData(); // Return actual object instead of null
-	//	}
-	//
-	//	@Override
-	//	public Display displayIt() {
-	//		return display;
-	//	}
+		} catch (Exception e) {
+			logger.severe("Error in validateNumber: " + e.getMessage());
+			return false; // Default to invalid on error
+		}
+	}
 
 	// Helper method to get stored data
 	public List<Integer> getStoredData() {
 		return new ArrayList<>(storedData);
+	}
+
+	// Helper method to clear stored data
+	public void clearStoredData() {
+		try {
+			int count = storedData.size();
+			storedData.clear();
+			logger.info("Cleared " + count + " items from storage");
+		} catch (Exception e) {
+			logger.severe("Error clearing stored data: " + e.getMessage());
+		}
 	}
 }
