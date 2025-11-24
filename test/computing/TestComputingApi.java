@@ -1,4 +1,5 @@
 package computing;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
@@ -9,6 +10,7 @@ import numberlettercountfetching.FetchApi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,7 +42,17 @@ public class TestComputingApi {
 		List<Integer> inputData = Arrays.asList();
 		String result = computingApi.initalize(inputData);
 
-		assertEquals("", result);
+		// Updated: Now returns error message instead of empty string
+		assertTrue(result.startsWith("ERROR: Input data cannot be empty"));
+	}
+
+	@Test
+	public void testInitializeWithNullInput() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+		String result = computingApi.initalize(null);
+
+		// Updated: Now returns error message for null input
+		assertTrue(result.startsWith("ERROR: Input data cannot be null"));
 	}
 
 	@Test
@@ -51,6 +63,16 @@ public class TestComputingApi {
 		String expected = "one,15,three";
 
 		assertEquals(expected, result);
+	}
+
+	@Test
+	public void testInitializeWithNullElements() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+		List<Integer> inputData = Arrays.asList(1, null, 3);
+		String result = computingApi.initalize(inputData);
+
+		// Updated: Now returns error message for null elements
+		assertTrue(result.startsWith("ERROR: Input list contains null values"));
 	}
 
 	@Test
@@ -77,6 +99,17 @@ public class TestComputingApi {
 	}
 
 	@Test
+	public void testPassDataWithNegativeNumber() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+
+		// Test passData with negative number
+		PassData passData = computingApi.passData(-5);
+		assertNotNull(passData);
+		// Should still create PassData but might have different data
+		assertNotNull(passData.getData());
+	}
+
+	@Test
 	public void testProcessPassData() {
 		ComputingApiImpl computingApi = new ComputingApiImpl();
 
@@ -97,6 +130,19 @@ public class TestComputingApi {
 	}
 
 	@Test
+	public void testProcessPassDataWithNull() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+
+		// Test processPassData with null parameter
+		List<Integer> result = computingApi.processPassData(null);
+		assertNotNull(result);
+
+		// Should return error indicator (-1)
+		assertEquals(1, result.size());
+		assertEquals(-1, result.get(0));
+	}
+
+	@Test
 	public void testComputeMethod() {
 		ComputingApiImpl computingApi = new ComputingApiImpl();
 		List<Integer> result = computingApi.compute();
@@ -110,5 +156,33 @@ public class TestComputingApi {
 		String result = computingApi.writeResult("test data", ",");
 
 		assertEquals("Processed: test data with delimiters: ,", result);
+	}
+
+	@Test
+	public void testWriteResultWithNullResult() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+		String result = computingApi.writeResult(null, ",");
+
+		// Updated: Now returns error message for null result
+		assertTrue(result.startsWith("ERROR: Result cannot be null"));
+	}
+
+	@Test
+	public void testWriteResultWithEmptyResult() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+		String result = computingApi.writeResult("   ", ",");
+
+		// Updated: Now returns error message for empty result
+		assertTrue(result.startsWith("ERROR: Result cannot be empty"));
+	}
+
+	@Test
+	public void testWriteResultWithNullDelimiters() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+		String result = computingApi.writeResult("test data", null);
+
+		// Should still work but use default delimiter
+		assertTrue(result.contains("Processed: test data"));
+		assertTrue(result.contains("with delimiters: ,"));
 	}
 }
