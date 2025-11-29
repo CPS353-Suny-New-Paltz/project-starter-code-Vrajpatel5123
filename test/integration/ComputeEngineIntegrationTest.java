@@ -74,7 +74,8 @@ public class ComputeEngineIntegrationTest {
 		// Step 3: Store processed results - use valid numeric data format
 		StringBuilder dataContent = new StringBuilder();
 		for (int i = 0; i < computedResults.size(); i++) {
-			if (i > 0) dataContent.append(",");
+			if (i > 0) { dataContent.append(",");
+			}
 			dataContent.append(computedResults.get(i));
 		}
 
