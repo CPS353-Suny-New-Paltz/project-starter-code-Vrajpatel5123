@@ -1,21 +1,20 @@
 package numberlettercountfetching;
 
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class StringFetchRequest extends FetchRequest {
 	private String text;
 
 	public StringFetchRequest(String text) {
-		super(convertStringToNumbers(text)); // Convert string to numbers
+		super(convertStringToNumbers(text));
 		this.text = text;
 	}
 
 	private static List<Integer> convertStringToNumbers(String text) {
-		// Convert each character to its ASCII value
 		return text.chars()
 				.boxed()
-				.collect(java.util.stream.Collectors.toList());
+				.collect(Collectors.toList());
 	}
 
 	public String getStringData() {

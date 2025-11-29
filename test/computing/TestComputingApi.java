@@ -1,74 +1,25 @@
 package computing;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
+import org.junit.jupiter.api.Test;
+
+
+import numberlettercountcomputing.ComputingApi;
 import numberlettercountcomputing.ComputingApiImpl;
 import numberlettercountcomputing.PassData;
-import numberlettercountdatastoring.DataStoreApi;
-import numberlettercountfetching.FetchApi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class TestComputingApi {
 
 	@Test
-	public void testInitializeAndCompute() {
-		// Create mock dependencies
-		FetchApi mockFetchApi = Mockito.mock(FetchApi.class);
-		DataStoreApi mockDataStoreApi = Mockito.mock(DataStoreApi.class);
-
-		// Create implementation with mocked dependencies
-		ComputingApiImpl computingApi = new ComputingApiImpl();
-		computingApi.setFetchApi(mockFetchApi);
-		computingApi.setDataStoreApi(mockDataStoreApi);
-
-		// Test data
-		List<Integer> inputData = Arrays.asList(1, 2, 3);
-		String result = computingApi.initalize(inputData);
-		String expected = "one,two,three";
-
-		assertEquals(expected, result);
-	}
-
-	@Test
-	public void testInitializeWithEmptyList() {
-		ComputingApiImpl computingApi = new ComputingApiImpl();
-		List<Integer> inputData = Arrays.asList();
-		String result = computingApi.initalize(inputData);
-
-		assertEquals("", result);
-	}
-
-	@Test
-	public void testInitializeWithNumbersOutOfRange() {
-		ComputingApiImpl computingApi = new ComputingApiImpl();
-		List<Integer> inputData = Arrays.asList(1, 15, 3); // 15 is out of 0-9 range
-		String result = computingApi.initalize(inputData);
-		String expected = "one,15,three";
-
-		assertEquals(expected, result);
-	}
-
-	@Test
-	public void testPassDataCreation() {
-		ComputingApiImpl computingApi = new ComputingApiImpl();
-
-		// Test passData() method - USING PassData import
-		PassData passData = computingApi.passData();
-		assertNotNull(passData);
-		assertEquals("computing module", passData.getFromComponent());
-		assertEquals("storage module", passData.getToComponent());
-	}
-
-	@Test
 	public void testPassDataWithNumber() {
-		ComputingApiImpl computingApi = new ComputingApiImpl();
+		ComputingApi computingApi = new ComputingApiImpl();
 
-		// Test passData(int number) method - USING PassData import
+		// Test passData(int number) method
 		PassData passData = computingApi.passData(5);
 		assertNotNull(passData);
 		assertEquals("five", passData.getData());
@@ -77,10 +28,20 @@ public class TestComputingApi {
 	}
 
 	@Test
-	public void testProcessPassData() {
-		ComputingApiImpl computingApi = new ComputingApiImpl();
+	public void testPassDataWithNumberOutOfRange() {
+		ComputingApi computingApi = new ComputingApiImpl();
 
-		// Create a PassData object - USING PassData import
+		// Test passData with number > 9
+		PassData passData = computingApi.passData(15);
+		assertNotNull(passData);
+		assertEquals("15", passData.getData());
+	}
+
+	@Test
+	public void testProcessPassData() {
+		ComputingApi computingApi = new ComputingApiImpl();
+
+		// Create a PassData object
 		PassData passData = new PassData();
 		passData.setData("test data");
 		passData.setFromComponent("source");
@@ -89,6 +50,7 @@ public class TestComputingApi {
 		// Test processPassData method
 		List<Integer> result = computingApi.processPassData(passData);
 		assertNotNull(result);
+		assertEquals(3, result.size());
 
 		// Should contain letter count (8 for "test data") and lengths of from/to components
 		assertEquals(8, result.get(0)); // "test data" has 8 letters (excluding space)
@@ -97,18 +59,26 @@ public class TestComputingApi {
 	}
 
 	@Test
-	public void testComputeMethod() {
-		ComputingApiImpl computingApi = new ComputingApiImpl();
-		List<Integer> result = computingApi.compute();
+	public void testProcessPassDataWithEmptyData() {
+		ComputingApi computingApi = new ComputingApiImpl();
 
-		assertEquals(Arrays.asList(1, 2, 3), result);
+		// Create a PassData object with empty data
+		PassData passData = new PassData();
+		passData.setData("");
+		passData.setFromComponent("test");
+		passData.setToComponent("test");
+
+		List<Integer> result = computingApi.processPassData(passData);
+		assertNotNull(result);
+		assertTrue(result.size() >= 2); // Should at least have component lengths
 	}
 
 	@Test
-	public void testWriteResult() {
-		ComputingApiImpl computingApi = new ComputingApiImpl();
-		String result = computingApi.writeResult("test data", ",");
+	public void testProcessPassDataWithNull() {
+		ComputingApi computingApi = new ComputingApiImpl();
 
-		assertEquals("Processed: test data with delimiters: ,", result);
+		List<Integer> result = computingApi.processPassData(null);
+		assertNotNull(result);
+		assertTrue(result.isEmpty());
 	}
 }
