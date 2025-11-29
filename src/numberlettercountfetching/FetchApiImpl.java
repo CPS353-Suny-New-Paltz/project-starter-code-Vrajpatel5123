@@ -5,7 +5,6 @@ import java.util.List;
 import numberlettercountdatastoring.DataStoreApi;
 
 public class FetchApiImpl implements FetchApi {
-	private static final Logger logger = Logger.getLogger(FetchApiImpl.class.getName());
 	private DataStoreApi dataStoreApi;
 	private List<Integer> storedData = new ArrayList<>();
 
@@ -27,6 +26,7 @@ public class FetchApiImpl implements FetchApi {
 
 			return new ArrayList<>(fetchRequest.getData());
 		}
+		return List.of(-1);
 	}
 
 	public boolean validateNumber(int number) {

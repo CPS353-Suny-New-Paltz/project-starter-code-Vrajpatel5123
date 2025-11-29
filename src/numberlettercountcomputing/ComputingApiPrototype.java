@@ -9,7 +9,7 @@ public class ComputingApiPrototype {
 	private int currentData;
 
 	@ConceptualAPIPrototype
-	public void prototype(ComputingApi computingApi) {  // FIXED: Changed parameter to ComputingApi
+	public void prototype(ComputingApi computingApi) {
 		System.out.println("=== Starting Computing API Prototype Demo ===");
 
 		// Test passData method

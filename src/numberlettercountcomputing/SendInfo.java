@@ -1,11 +1,9 @@
 package numberlettercountcomputing;
 
 public class SendInfo {
-
 	private String data;
 	private String destination;
 
-	// Getters and setters
 	public String getData() { 
 		return data != null ? data : "no data"; 
 	}
@@ -26,5 +24,4 @@ public class SendInfo {
 	public String toString() {
 		return "SendInfo{data='" + getData() + "', destination='" + getDestination() + "'}";
 	}
-
 }

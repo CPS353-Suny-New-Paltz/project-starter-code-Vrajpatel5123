@@ -1,7 +1,6 @@
 package numberlettercountfetching;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class StringFetchRequest extends FetchRequest {
 	private String text;
@@ -14,7 +13,7 @@ public class StringFetchRequest extends FetchRequest {
 	private static List<Integer> convertStringToNumbers(String text) {
 		return text.chars()
 				.boxed()
-				.collect(Collectors.toList());
+				.collect(java.util.stream.Collectors.toList());
 	}
 
 	public String getStringData() {
