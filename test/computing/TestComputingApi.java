@@ -81,4 +81,32 @@ public class TestComputingApi {
 		assertNotNull(result);
 		assertTrue(result.isEmpty());
 	}
+
+	@Test
+	public void testWriteResultWithNullResult() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+		String result = computingApi.writeResult(null, ",");
+
+		// Updated: Now returns error message for null result
+		assertTrue(result.startsWith("ERROR: Result cannot be null"));
+	}
+
+	@Test
+	public void testWriteResultWithEmptyResult() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+		String result = computingApi.writeResult("   ", ",");
+
+		// Updated: Now returns error message for empty result
+		assertTrue(result.startsWith("ERROR: Result cannot be empty"));
+	}
+
+	@Test
+	public void testWriteResultWithNullDelimiters() {
+		ComputingApiImpl computingApi = new ComputingApiImpl();
+		String result = computingApi.writeResult("test data", null);
+
+		// Should still work but use default delimiter
+		assertTrue(result.contains("Processed: test data"));
+		assertTrue(result.contains("with delimiters: ,"));
+	}
 }
