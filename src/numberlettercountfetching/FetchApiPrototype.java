@@ -1,78 +1,40 @@
 package numberlettercountfetching;
 
 import java.util.Arrays;
-
+import java.util.List;
 
 import project.annotations.NetworkAPIPrototype;
 
 public class FetchApiPrototype {
 
 	@NetworkAPIPrototype
-	public void prototype(FetchApi fetchapi) {
+	public void prototype(FetchApi fetchApi) {
 		System.out.println("=== Fetch API Prototype Demo ===");
 
-		fetchapi.insertRequest(new FetchRequest(Arrays.asList(123)));    
-		fetchapi.insertRequest(new IntFetchRequest(123));
-		fetchapi.insertRequest(new StringFetchRequest("hello"));
-		fetchapi.insertRequest(new ListFetchRequest(Arrays.asList(1, 2, 3)));
+		// Test with different types of fetch requests
+		FetchRequest basicRequest = new FetchRequest(Arrays.asList(1, 2, 3));
+		List<Integer> result1 = fetchApi.insertRequest(basicRequest);
+		System.out.println("1. Basic request result: " + result1);
 
+		IntFetchRequest intRequest = new IntFetchRequest(42);
+		List<Integer> result2 = fetchApi.insertRequest(intRequest);
+		System.out.println("2. Int request result: " + result2);
 
-		//		List<Integer> allData = fetchapi.fetchAllData();
-		//		System.out.println("Fetched data: " + allData);
+		StringFetchRequest stringRequest = new StringFetchRequest("test");
+		List<Integer> result3 = fetchApi.insertRequest(stringRequest);
+		System.out.println("3. String request result: " + result3);
 
-		boolean isValid = fetchapi.validateNumber(5);
-		System.out.println("Number validation: " + isValid);
+		ListFetchRequest listRequest = new ListFetchRequest(Arrays.asList(7, 8, 9));
+		List<Integer> result4 = fetchApi.insertRequest(listRequest);
+		System.out.println("4. List request result: " + result4);
+
+		// Test validation
+		boolean valid1 = fetchApi.validateNumber(10);
+		System.out.println("5. Validation for 10: " + valid1);
+
+		boolean valid2 = fetchApi.validateNumber(-5);
+		System.out.println("6. Validation for -5: " + valid2);
 
 		System.out.println("=== Fetch API Prototype Demo Complete ===");
 	}
-
-	//	String inputSource;
-	//
-	//	String outputResult;
-	//
-	//
-	//
-	//	final String defaultDelimiters = ".;|";
-	//
-	//	private String delimiters;
-	//
-	//	@NetworkAPIPrototype
-	//	public void prototype(FetchApi fetchapi)   {
-	//
-	//		fetchapi.insertRequest(new FetchRequest(Arrays.asList(123)));	
-	//		fetchapi.insertRequest(new IntFetchRequest(123));
-	//
-	//		// For string
-	//		fetchapi.insertRequest(new StringFetchRequest("hello"));
-	//
-	//		// For list
-	//		fetchapi.insertRequest(new ListFetchRequest(Arrays.asList(1, 2, 3)));
-	//		//User specify input location, output(file or database) and delimiter
-	//		//Get back success or failed.
-	//	}
-
-	//	public  String getInputSource(String inputSource) {
-	//		return inputSource;
-	//	}
-	//	
-	//	public String getOutputResult(String outputResult) {
-	//		return outputResult;
-	//	}
-	//	
-	//	public String setDelimiters(String delimiters) {
-	//		return this.setDelimiters(delimiters);
-	//	}
-	//	
-	//	public String useDefaultDelimiters(String delimiters) {
-	//		return this.useDefaultDelimiters(delimiters);
-	//	}
-	//	
-	//	public void passData(PassData data) {
-	//		this.passData(data);
-	//	}
-	//	
-	//	public void displayResult(Display display) {
-	//		this.displayResult(display);
-	//	}
-
 }

@@ -1,12 +1,10 @@
 package numberlettercountcomputing;
 
 public class ProcessData {
-
 	private String inputData;
 	private String outputData;
 	private String processingType;
 
-	// Getters and setters
 	public String getInputData() { 
 		return inputData != null ? inputData : "no input data"; 
 	}
@@ -35,5 +33,4 @@ public class ProcessData {
 	public String toString() {
 		return "ProcessData{input='" + getInputData() + "', output='" + getOutputData() + "', type='" + getProcessingType() + "'}";
 	}
-
 }

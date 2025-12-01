@@ -4,7 +4,6 @@ public class RecieveInfo {
 	private String data;
 	private String source;
 
-	// Getters and setters
 	public String getData() { 
 		return data != null ? data : "no data"; 
 	}
@@ -25,5 +24,4 @@ public class RecieveInfo {
 	public String toString() {
 		return "RecieveInfo{data='" + getData() + "', source='" + getSource() + "'}";
 	}
-
 }
