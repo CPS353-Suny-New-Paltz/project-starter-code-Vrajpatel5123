@@ -17,21 +17,29 @@ import numberlettercountcomputing.ComputingApi;
 import numberlettercountcomputing.ComputingApiImpl;
 import numberlettercountcomputing.PassData;
 import numberlettercountdatastoring.DataStoreApi;
-import numberlettercountdatastoring.DataStoreApiImpl;
 import numberlettercountdatastoring.DataRequest;
+
+// Import the InMemoryDataStore and its dependencies
+import inmemory.InMemoryDataStore;
+import configuration.TestInputConfiguration;
+import configuration.TestOutputConfiguration;
 
 public class ComputeEngineIntegrationTest {
 
+	// Remove the setComputingApi call since InMemoryDataStore doesn't have it
 	@Test
 	public void testIntegrationWithFetchApiAndComputingApi() {
 		// Create components
 		FetchApi fetchApi = new FetchApiImpl();
 		ComputingApi computingApi = new ComputingApiImpl();
-		DataStoreApi dataStoreApi = new DataStoreApiImpl();
 
-		// Connect components
+		// Create InMemoryDataStore with test configurations
+		TestInputConfiguration inputConfig = new TestInputConfiguration();
+		TestOutputConfiguration outputConfig = new TestOutputConfiguration();
+		DataStoreApi dataStoreApi = new InMemoryDataStore(inputConfig, outputConfig);
+
+		// Connect components - InMemoryDataStore doesn't need ComputingApi
 		((FetchApiImpl) fetchApi).setDataStoreApi(dataStoreApi);
-		((DataStoreApiImpl) dataStoreApi).setComputingApi(computingApi);
 
 		// Test FetchApi -> DataStoreApi integration
 		FetchRequest listRequest = new ListFetchRequest(Arrays.asList(1, 2, 3));
@@ -52,14 +60,20 @@ public class ComputeEngineIntegrationTest {
 		// Test DataStoreApi insert with valid data
 		DataRequest dataRequest = new DataRequest(1, "integration_test", "10,20,30");
 		int insertResult = dataStoreApi.insertRequest(dataRequest);
-		assertTrue(insertResult == 0 || insertResult == -1, "DataStoreApi insert should return 0 (success) or -1 (failure)");
+		// InMemoryDataStore returns 0 when configs are set
+		assertEquals(0, insertResult, "InMemoryDataStore should return 0 for success");
 	}
 
 	@Test
 	public void testFullWorkflow() {
-		// Create and connect all components
+		// Create and connect all components with InMemoryDataStore
 		ComputingApi computingApi = new ComputingApiImpl();
-		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+
+		// Setup test configurations for InMemoryDataStore
+		TestInputConfiguration inputConfig = new TestInputConfiguration();
+		TestOutputConfiguration outputConfig = new TestOutputConfiguration();
+		DataStoreApi dataStoreApi = new InMemoryDataStore(inputConfig, outputConfig);
+
 		FetchApi fetchApi = new FetchApiImpl();
 		((FetchApiImpl) fetchApi).setDataStoreApi(dataStoreApi);
 
@@ -83,34 +97,42 @@ public class ComputeEngineIntegrationTest {
 		DataRequest storeRequest = new DataRequest(2, "workflow_test", dataContent.toString());
 		int storeResult = dataStoreApi.insertRequest(storeRequest);
 
-		// Verify workflow success - don't assume specific return value, just check it's a valid result
+		// Verify workflow success
 		assertEquals(List.of(7), fetchedData);
 		assertFalse(computedResults.isEmpty());
-		assertTrue(storeResult == 0 || storeResult == -1, "Store result should be 0 (success) or -1 (failure)");
+		// InMemoryDataStore returns 0 for success when input/output configs exist
+		assertEquals(0, storeResult, "InMemoryDataStore should return 0 for success with valid configs");
 		assertTrue(fetchApi.validateNumber(7));
 		assertTrue(dataStoreApi.validateNumber(7));
 	}
 
 	@Test
 	public void testDataStoreInsertWithValidData() {
-		ComputingApi computingApi = new ComputingApiImpl();
-		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+		// Setup InMemoryDataStore with test configurations
+		TestInputConfiguration inputConfig = new TestInputConfiguration();
+		TestOutputConfiguration outputConfig = new TestOutputConfiguration();
+		DataStoreApi dataStoreApi = new InMemoryDataStore(inputConfig, outputConfig);
 
 		// Test with simple valid data that should definitely work
 		DataRequest request = new DataRequest(1, "test", "1,2,3");
 		int result = dataStoreApi.insertRequest(request);
 
-		// Just verify it doesn't throw an exception and returns a valid code
-		assertTrue(result == 0 || result == -1);
+		// InMemoryDataStore returns 0 when configs are set
+		assertEquals(0, result, "InMemoryDataStore should return 0 with valid configurations");
 	}
 
 	@Test
 	public void testComponentCommunication() {
 		// Simple test to verify components can talk to each other
-		ComputingApi computingApi = new ComputingApiImpl();
-		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+		// Setup InMemoryDataStore with test configurations
+		TestInputConfiguration inputConfig = new TestInputConfiguration();
+		TestOutputConfiguration outputConfig = new TestOutputConfiguration();
+		DataStoreApi dataStoreApi = new InMemoryDataStore(inputConfig, outputConfig);
+
 		FetchApi fetchApi = new FetchApiImpl();
 		((FetchApiImpl) fetchApi).setDataStoreApi(dataStoreApi);
+
+		ComputingApi computingApi = new ComputingApiImpl();
 
 		// Test basic functionality without assuming specific return values
 		FetchRequest request = new IntFetchRequest(5);
