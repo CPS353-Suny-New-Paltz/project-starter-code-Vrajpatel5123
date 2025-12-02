@@ -1,22 +1,22 @@
 package numberlettercountcomputing;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
-import numberlettercountdatastoring.DataStoreApi;
-import numberlettercountfetching.FetchApi;
-
 public class ComputingApiImpl implements ComputingApi {
+<<<<<<< HEAD
     private static final Logger logger = Logger.getLogger(ComputingApiImpl.class.getName());
     private FetchApi fetchApi;
     private DataStoreApi dataStoreApi;
+=======
+>>>>>>> main
 
     public ComputingApiImpl() {
         logger.info("ComputingApiImpl created");
     }
 
+<<<<<<< HEAD
     public ComputingApiImpl(FetchApi fetchApi, DataStoreApi dataStoreApi) {
         this.fetchApi = fetchApi;
         this.dataStoreApi = dataStoreApi;
@@ -187,6 +187,27 @@ public class ComputingApiImpl implements ComputingApi {
         recieveInfo.setSource("default source");
         return recieveInfo;
     }
+=======
+	public PassData passData(int number) {
+		PassData passData = new PassData();
+
+		String[] numberWords = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+		String word = "";
+
+		if (number >= 0 && number <= 9) {
+			word = numberWords[number];
+		} else {
+			word = String.valueOf(number);
+		}
+
+		passData.setData(word);
+		passData.setFromComponent("number_converter");
+		passData.setToComponent("output_processor");
+
+		System.out.println("Created PassData for number " + number + ": " + passData);
+		return passData;
+	}
+>>>>>>> main
 
     public ProcessData processData() {
         // No parameters to validate
@@ -211,6 +232,7 @@ public class ComputingApiImpl implements ComputingApi {
                 return Arrays.asList(-1); // Error indicator
             }
 
+<<<<<<< HEAD
             logger.info("Processing pass data: " + passData);
             List<Integer> resultList = new ArrayList<>();
 
@@ -298,4 +320,8 @@ public class ComputingApiImpl implements ComputingApi {
             return errorData;
         }
     }
+=======
+		return resultList;
+	}
+>>>>>>> main
 }

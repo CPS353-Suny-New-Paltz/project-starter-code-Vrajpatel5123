@@ -25,6 +25,15 @@ public class DataStoreApiImpl implements DataStoreApi {
 	}
 
 	public int insertRequest(DataRequest dataRequest) {
+<<<<<<< HEAD
+=======
+		if (dataRequest == null) {
+			return -1;
+		}
+
+		System.out.println("Processing data request: " + dataRequest);
+
+>>>>>>> main
 		try {
 			// Validate parameter
 			if (dataRequest == null) {
@@ -53,11 +62,17 @@ public class DataStoreApiImpl implements DataStoreApi {
 				try {
 					int number = Integer.parseInt(numStr.trim());
 
+<<<<<<< HEAD
 					// Validate number
 					if (number < 0) {
 						logger.warning("Skipping negative number: " + number);
 						continue;
 					}
+=======
+				if (computingApi != null) {
+					PassData passData = computingApi.passData(number);
+					System.out.println("Created PassData for number " + number + ": " + passData);
+>>>>>>> main
 
 					storedNumbers.add(number);
 					storedCount++;
@@ -79,6 +94,7 @@ public class DataStoreApiImpl implements DataStoreApi {
 					// Continue with next number
 				}
 			}
+<<<<<<< HEAD
 
 			if (storedCount == 0) {
 				logger.warning("No valid numbers stored from request");
@@ -134,9 +150,26 @@ public class DataStoreApiImpl implements DataStoreApi {
 			// Basic validation
 			if (number < 0) {
 				logger.warning("Negative number invalid: " + number);
+=======
+			return 0;
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+
+	public boolean validateNumber(int number) {
+		boolean basicValidation = number >= 0;
+		if (computingApi != null) {
+			try {
+				PassData validationPassData = computingApi.passData(number);
+				List<Integer> validationResults = computingApi.processPassData(validationPassData);
+				return basicValidation && validationResults != null && !validationResults.isEmpty();
+			} catch (Exception e) {
+>>>>>>> main
 				return false;
 			}
 
+<<<<<<< HEAD
 			// Additional validation with ComputingApi if available
 			if (computingApi != null) {
 				try {
@@ -276,4 +309,13 @@ public class DataStoreApiImpl implements DataStoreApi {
 	public String getStorageInfo() {
 		return "DataStore contains " + storedNumbers.size() + " numbers";
 	}
+=======
+	public List<Integer> fetchAllData() {
+		return new ArrayList<>(storedNumbers);
+	}
+
+	public int getStoredDataCount() {
+		return storedNumbers.size();
+	}
+>>>>>>> main
 }

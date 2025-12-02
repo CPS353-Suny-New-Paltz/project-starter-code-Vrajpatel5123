@@ -2,8 +2,11 @@ package numberlettercountfetching;
 
 import java.util.ArrayList;
 import java.util.List;
+<<<<<<< HEAD
 import java.util.logging.Logger;
 
+=======
+>>>>>>> main
 import numberlettercountdatastoring.DataStoreApi;
 
 public class FetchApiImpl implements FetchApi {
@@ -16,6 +19,7 @@ public class FetchApiImpl implements FetchApi {
 	}
 
 	public List<Integer> insertRequest(FetchRequest fetchRequest) {
+<<<<<<< HEAD
 		try {
 			// Validate parameter
 			if (fetchRequest == null) {
@@ -92,10 +96,40 @@ public class FetchApiImpl implements FetchApi {
 	}
 
 	// Helper method to get stored data
+=======
+		if (fetchRequest != null && fetchRequest.getData() != null) {
+			storedData.addAll(fetchRequest.getData());
+
+			// Validate each number if DataStoreApi is available
+			if (dataStoreApi != null) {
+				for (Integer number : fetchRequest.getData()) {
+					boolean isValid = dataStoreApi.validateNumber(number);
+					System.out.println("Number " + number + " validation: " + isValid);
+				}
+			}
+
+			return new ArrayList<>(fetchRequest.getData());
+		}
+		return List.of(-1);
+	}
+
+	public boolean validateNumber(int number) {
+		boolean basicValidation = number >= 0;
+
+		// If DataStoreApi is available, use it for additional validation
+		if (dataStoreApi != null) {
+			return basicValidation && dataStoreApi.validateNumber(number);
+		}
+
+		return basicValidation;
+	}
+
+>>>>>>> main
 	public List<Integer> getStoredData() {
 		return new ArrayList<>(storedData);
 	}
 
+<<<<<<< HEAD
 	// Helper method to clear stored data
 	public void clearStoredData() {
 		try {
@@ -105,5 +139,9 @@ public class FetchApiImpl implements FetchApi {
 		} catch (Exception e) {
 			logger.severe("Error clearing stored data: " + e.getMessage());
 		}
+=======
+	public int getStoredDataCount() {
+		return storedData.size();
+>>>>>>> main
 	}
 }
