@@ -2,11 +2,7 @@ package numberlettercountfetching;
 
 import java.util.ArrayList;
 import java.util.List;
-<<<<<<< HEAD
 import java.util.logging.Logger;
-
-=======
->>>>>>> main
 import numberlettercountdatastoring.DataStoreApi;
 
 public class FetchApiImpl implements FetchApi {
@@ -16,12 +12,12 @@ public class FetchApiImpl implements FetchApi {
 
 	public void setDataStoreApi(DataStoreApi dataStoreApi) {
 		this.dataStoreApi = dataStoreApi;
+		logger.info("DataStoreApi dependency set");
 	}
 
 	public List<Integer> insertRequest(FetchRequest fetchRequest) {
-<<<<<<< HEAD
 		try {
-			// Validate parameter
+			// Parameter validation
 			if (fetchRequest == null) {
 				logger.warning("FetchRequest is null");
 				return List.of(-1); // Error indicator
@@ -38,21 +34,41 @@ public class FetchApiImpl implements FetchApi {
 				return List.of(-1);
 			}
 
-			// Validate each number
-			for (Integer num : data) {
-				if (num == null) {
+			// Validate and store each number
+			int validCount = 0;
+			for (Integer number : data) {
+				if (number == null) {
 					logger.warning("Skipping null number in request");
 					continue;
 				}
-				if (num < 0) {
-					logger.warning("Skipping negative number: " + num);
+
+				if (number < 0) {
+					logger.warning("Skipping negative number: " + number);
 					continue;
 				}
-				storedData.add(num);
-				logger.info("Stored number: " + num);
+
+				storedData.add(number);
+				validCount++;
+				logger.info("Stored number: " + number);
+
+				// Validate with DataStoreApi if available
+				if (dataStoreApi != null) {
+					try {
+						boolean isValid = dataStoreApi.validateNumber(number);
+						logger.info("Number " + number + " validation: " + isValid);
+					} catch (Exception e) {
+						logger.warning("DataStoreApi validation failed for number " + number + ": " + e.getMessage());
+					}
+				}
 			}
 
-			return new ArrayList<>(data); // Return copy
+			if (validCount == 0) {
+				logger.warning("No valid numbers found in request");
+				return List.of(-1);
+			}
+
+			logger.info("Successfully stored " + validCount + " numbers");
+			return new ArrayList<>(data); // Return defensive copy
 
 		} catch (Exception e) {
 			logger.severe("Error in insertRequest: " + e.getMessage());
@@ -60,34 +76,29 @@ public class FetchApiImpl implements FetchApi {
 		}
 	}
 
-	public List<Integer> fetchAllData() {
-		try {
-			logger.info("Fetching " + storedData.size() + " items");
-			return new ArrayList<>(storedData); // Return copy for safety
-
-		} catch (Exception e) {
-			logger.severe("Error in fetchAllData: " + e.getMessage());
-			return new ArrayList<>(); // Return empty list on error
-		}
-	}
-
-	public void processRequest() {
-		try {
-			logger.info("Processing fetch request with " + storedData.size() + " items");
-			// Processing logic here
-
-		} catch (Exception e) {
-			logger.severe("Error in processRequest: " + e.getMessage());
-			// Void method - just log the error
-		}
-	}
-
 	public boolean validateNumber(int number) {
 		try {
-			// Simple validation - numbers must be non-negative
-			boolean isValid = number >= 0;
-			logger.info("Number " + number + " validation: " + isValid);
-			return isValid;
+			// Basic validation
+			boolean basicValidation = number >= 0;
+			logger.info("Basic validation for number " + number + ": " + basicValidation);
+
+			if (!basicValidation) {
+				return false;
+			}
+
+			// Additional validation with DataStoreApi if available
+			if (dataStoreApi != null) {
+				try {
+					boolean dataStoreValidation = dataStoreApi.validateNumber(number);
+					logger.info("DataStoreApi validation for number " + number + ": " + dataStoreValidation);
+					return dataStoreValidation;
+				} catch (Exception e) {
+					logger.warning("DataStoreApi validation failed: " + e.getMessage());
+					// Fall back to basic validation
+				}
+			}
+
+			return basicValidation;
 
 		} catch (Exception e) {
 			logger.severe("Error in validateNumber: " + e.getMessage());
@@ -95,42 +106,21 @@ public class FetchApiImpl implements FetchApi {
 		}
 	}
 
-	// Helper method to get stored data
-=======
-		if (fetchRequest != null && fetchRequest.getData() != null) {
-			storedData.addAll(fetchRequest.getData());
-
-			// Validate each number if DataStoreApi is available
-			if (dataStoreApi != null) {
-				for (Integer number : fetchRequest.getData()) {
-					boolean isValid = dataStoreApi.validateNumber(number);
-					System.out.println("Number " + number + " validation: " + isValid);
-				}
-			}
-
-			return new ArrayList<>(fetchRequest.getData());
-		}
-		return List.of(-1);
-	}
-
-	public boolean validateNumber(int number) {
-		boolean basicValidation = number >= 0;
-
-		// If DataStoreApi is available, use it for additional validation
-		if (dataStoreApi != null) {
-			return basicValidation && dataStoreApi.validateNumber(number);
-		}
-
-		return basicValidation;
-	}
-
->>>>>>> main
 	public List<Integer> getStoredData() {
-		return new ArrayList<>(storedData);
+		try {
+			logger.info("Returning " + storedData.size() + " stored items");
+			return new ArrayList<>(storedData); // Return defensive copy
+		} catch (Exception e) {
+			logger.severe("Error in getStoredData: " + e.getMessage());
+			return new ArrayList<>(); // Return empty list on error
+		}
 	}
 
-<<<<<<< HEAD
-	// Helper method to clear stored data
+	public int getStoredDataCount() {
+		return storedData.size();
+	}
+
+	// Helper method with error handling
 	public void clearStoredData() {
 		try {
 			int count = storedData.size();
@@ -139,9 +129,5 @@ public class FetchApiImpl implements FetchApi {
 		} catch (Exception e) {
 			logger.severe("Error clearing stored data: " + e.getMessage());
 		}
-=======
-	public int getStoredDataCount() {
-		return storedData.size();
->>>>>>> main
 	}
 }

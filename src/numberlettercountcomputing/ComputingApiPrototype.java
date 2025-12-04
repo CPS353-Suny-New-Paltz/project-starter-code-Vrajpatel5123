@@ -10,11 +10,7 @@ public class ComputingApiPrototype {
 	private int currentData;
 
 	@ConceptualAPIPrototype
-<<<<<<< Updated upstream
 	public void prototype(ComputingApi computingApi) {
-=======
-	public void prototype(ComputingApi computingApi) {  // FIXED: Changed parameter to ComputingApi
->>>>>>> Stashed changes
 		System.out.println("=== Starting Computing API Prototype Demo ===");
 
 		// Test passData method

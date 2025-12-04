@@ -12,7 +12,7 @@ public class DataStoreApiImpl implements DataStoreApi {
 	private List<Integer> storedNumbers = new ArrayList<>();
 
 	public DataStoreApiImpl() {
-		logger.info("DataStoreApiImpl created");
+		logger.info("DataStoreApiImpl created without ComputingApi");
 	}
 
 	public DataStoreApiImpl(ComputingApi computingApi) {
@@ -22,20 +22,12 @@ public class DataStoreApiImpl implements DataStoreApi {
 
 	public void setComputingApi(ComputingApi computingApi) {
 		this.computingApi = computingApi;
+		logger.info("ComputingApi dependency set");
 	}
 
 	public int insertRequest(DataRequest dataRequest) {
-<<<<<<< HEAD
-=======
-		if (dataRequest == null) {
-			return -1;
-		}
-
-		System.out.println("Processing data request: " + dataRequest);
-
->>>>>>> main
 		try {
-			// Validate parameter
+			// Parameter validation
 			if (dataRequest == null) {
 				logger.warning("DataRequest is null");
 				return -1; // Error code
@@ -48,7 +40,7 @@ public class DataStoreApiImpl implements DataStoreApi {
 
 			String dataContent = dataRequest.getDataContent();
 			if (dataContent == null || dataContent.trim().isEmpty()) {
-				logger.warning("Data content is empty");
+				logger.warning("Data content is empty for request ID: " + dataRequest.getRequestId());
 				return -1;
 			}
 
@@ -62,17 +54,11 @@ public class DataStoreApiImpl implements DataStoreApi {
 				try {
 					int number = Integer.parseInt(numStr.trim());
 
-<<<<<<< HEAD
-					// Validate number
+					// Validate number before storing
 					if (number < 0) {
 						logger.warning("Skipping negative number: " + number);
 						continue;
 					}
-=======
-				if (computingApi != null) {
-					PassData passData = computingApi.passData(number);
-					System.out.println("Created PassData for number " + number + ": " + passData);
->>>>>>> main
 
 					storedNumbers.add(number);
 					storedCount++;
@@ -82,26 +68,27 @@ public class DataStoreApiImpl implements DataStoreApi {
 					if (computingApi != null) {
 						try {
 							PassData passData = computingApi.passData(number);
+							logger.info("Created PassData for number " + number + ": " + passData);
+
 							List<Integer> processedResults = computingApi.processPassData(passData);
-							logger.info("Processed number " + number + " with results: " + processedResults);
+							logger.info("Processed results for number " + number + ": " + processedResults);
 						} catch (Exception e) {
 							logger.warning("ComputingApi processing failed for number " + number + ": " + e.getMessage());
 						}
 					}
 
 				} catch (NumberFormatException e) {
-					logger.warning("Invalid number format: '" + numStr + "'");
+					logger.warning("Invalid number format: '" + numStr + "' in request ID: " + dataRequest.getRequestId());
 					// Continue with next number
 				}
 			}
-<<<<<<< HEAD
 
 			if (storedCount == 0) {
-				logger.warning("No valid numbers stored from request");
+				logger.warning("No valid numbers stored from request ID: " + dataRequest.getRequestId());
 				return -1;
 			}
 
-			logger.info("Successfully stored " + storedCount + " numbers");
+			logger.info("Successfully stored " + storedCount + " numbers from request ID: " + dataRequest.getRequestId());
 			return 0; // Success code
 
 		} catch (Exception e) {
@@ -110,66 +97,16 @@ public class DataStoreApiImpl implements DataStoreApi {
 		}
 	}
 
-	public List<Integer> fetchAllData() {
-		try {
-			logger.info("Fetching " + storedNumbers.size() + " stored numbers");
-
-			// Process with ComputingApi if available
-			if (computingApi != null && !storedNumbers.isEmpty()) {
-				try {
-					// Create batch data for processing
-					PassData bulkPassData = new PassData();
-					StringBuilder dataBuilder = new StringBuilder();
-					for (Integer num : storedNumbers) {
-						if (dataBuilder.length() > 0) {
-							dataBuilder.append(",");
-						}
-						dataBuilder.append(num);
-					}
-					bulkPassData.setData(dataBuilder.toString());
-					bulkPassData.setFromComponent("DataStore");
-					bulkPassData.setToComponent("Client");
-
-					List<Integer> processingResults = computingApi.processPassData(bulkPassData);
-					logger.info("Bulk processing completed with " + processingResults.size() + " results");
-				} catch (Exception e) {
-					logger.warning("Bulk processing failed: " + e.getMessage());
-				}
-			}
-
-			return new ArrayList<>(storedNumbers); // Return copy
-
-		} catch (Exception e) {
-			logger.severe("Error in fetchAllData: " + e.getMessage());
-			return new ArrayList<>(); // Return empty list on error
-		}
-	}
-
 	public boolean validateNumber(int number) {
 		try {
 			// Basic validation
 			if (number < 0) {
 				logger.warning("Negative number invalid: " + number);
-=======
-			return 0;
-		} catch (Exception e) {
-			return -1;
-		}
-	}
-
-	public boolean validateNumber(int number) {
-		boolean basicValidation = number >= 0;
-		if (computingApi != null) {
-			try {
-				PassData validationPassData = computingApi.passData(number);
-				List<Integer> validationResults = computingApi.processPassData(validationPassData);
-				return basicValidation && validationResults != null && !validationResults.isEmpty();
-			} catch (Exception e) {
->>>>>>> main
 				return false;
 			}
 
-<<<<<<< HEAD
+			logger.info("Basic validation passed for number: " + number);
+
 			// Additional validation with ComputingApi if available
 			if (computingApi != null) {
 				try {
@@ -181,17 +118,30 @@ public class DataStoreApiImpl implements DataStoreApi {
 					return isValid;
 
 				} catch (Exception e) {
-					logger.warning("ComputingApi validation failed: " + e.getMessage());
+					logger.warning("ComputingApi validation failed for number " + number + ": " + e.getMessage());
 					// Fall back to basic validation
 				}
 			}
 
-			logger.info("Basic validation for " + number + ": true");
-			return true; // Basic validation passed
+			// If we get here, basic validation passed and either ComputingApi is null or failed
+			return true;
 
 		} catch (Exception e) {
 			logger.severe("Error in validateNumber: " + e.getMessage());
 			return false; // Default to invalid on error
+		}
+	}
+
+	public List<Integer> fetchAllData() {
+		try {
+			logger.info("Fetching " + storedNumbers.size() + " stored numbers");
+
+			// Return defensive copy
+			return new ArrayList<>(storedNumbers);
+
+		} catch (Exception e) {
+			logger.severe("Error in fetchAllData: " + e.getMessage());
+			return new ArrayList<>(); // Return empty list on error
 		}
 	}
 
@@ -204,34 +154,7 @@ public class DataStoreApiImpl implements DataStoreApi {
 				return false;
 			}
 
-			// Process with ComputingApi if available
-			if (computingApi != null) {
-				// Process each number individually
-				for (Integer number : storedNumbers) {
-					try {
-						PassData passData = computingApi.passData(number);
-						List<Integer> results = computingApi.processPassData(passData);
-						logger.info("Processed number " + number + " with " + results.size() + " results");
-					} catch (Exception e) {
-						logger.warning("Failed to process number " + number + ": " + e.getMessage());
-					}
-				}
-
-				// Process as batch
-				try {
-					PassData batchPassData = new PassData();
-					batchPassData.setData("Batch of " + storedNumbers.size() + " numbers");
-					batchPassData.setFromComponent("DataStore");
-					batchPassData.setToComponent("BatchProcessor");
-
-					List<Integer> batchResults = computingApi.processPassData(batchPassData);
-					logger.info("Batch processing completed with " + batchResults.size() + " results");
-				} catch (Exception e) {
-					logger.warning("Batch processing failed: " + e.getMessage());
-				}
-			}
-
-			logger.info("Process request completed successfully");
+			logger.info("Process request completed successfully for " + storedNumbers.size() + " items");
 			return true;
 
 		} catch (Exception e) {
@@ -240,82 +163,23 @@ public class DataStoreApiImpl implements DataStoreApi {
 		}
 	}
 
-	// Helper methods with error handling
-	public List<Integer> processAllNumbers() {
-		try {
-			if (computingApi != null && !storedNumbers.isEmpty()) {
-				List<Integer> allResults = new ArrayList<>();
-				for (Integer number : storedNumbers) {
-					try {
-						PassData passData = computingApi.passData(number);
-						List<Integer> results = computingApi.processPassData(passData);
-						allResults.addAll(results);
-					} catch (Exception e) {
-						logger.warning("Failed to process number " + number);
-					}
-				}
-				return allResults;
-			}
-			return new ArrayList<>();
-		} catch (Exception e) {
-			logger.severe("Error in processAllNumbers: " + e.getMessage());
-			return new ArrayList<>();
-		}
-	}
-
 	public int getStoredDataCount() {
 		return storedNumbers.size();
 	}
 
-	public boolean clearStorage() {
+	// Helper method to clear storage
+	public void clearStorage() {
 		try {
 			int previousSize = storedNumbers.size();
-			if (previousSize > 0) {
-				// Notify ComputingApi if available
-				if (computingApi != null) {
-					try {
-						PassData clearancePassData = new PassData();
-						clearancePassData.setData("Clearing " + previousSize + " items");
-						clearancePassData.setFromComponent("DataStore");
-						clearancePassData.setToComponent("Cleanup");
-
-						computingApi.processPassData(clearancePassData);
-						logger.info("Notified ComputingApi about clearance");
-					} catch (Exception e) {
-						logger.warning("Clearance notification failed: " + e.getMessage());
-					}
-				}
-
-				storedNumbers.clear();
-				logger.info("Cleared " + previousSize + " items from storage");
-				return true;
-			}
-
-			logger.info("Storage was already empty");
-			return false;
-
+			storedNumbers.clear();
+			logger.info("Cleared " + previousSize + " items from storage");
 		} catch (Exception e) {
 			logger.severe("Error in clearStorage: " + e.getMessage());
-			return false;
 		}
 	}
 
-	// Helper to check if storage is empty
+	// Helper method to check if storage is empty
 	public boolean isEmpty() {
 		return storedNumbers.isEmpty();
 	}
-
-	// Helper to get storage info
-	public String getStorageInfo() {
-		return "DataStore contains " + storedNumbers.size() + " numbers";
-	}
-=======
-	public List<Integer> fetchAllData() {
-		return new ArrayList<>(storedNumbers);
-	}
-
-	public int getStoredDataCount() {
-		return storedNumbers.size();
-	}
->>>>>>> main
 }
