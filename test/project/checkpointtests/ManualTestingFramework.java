@@ -1,3 +1,4 @@
+
 package project.checkpointtests;
 
 import numberlettercountcomputing.ComputingApi;
@@ -51,4 +52,20 @@ public class ManualTestingFramework {
 
 		System.out.println("\n=== Manual Testing Framework Finished ===");
 	}
+<<<<<<< HEAD
 }
+=======
+
+	// Simple helper method to convert numbers to words (0-9 only for simplicity)
+	private static String convertNumberToWord(int number) {
+		String[] numberWords = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+
+		if (number >= 0 && number <= 9) {
+			return numberWords[number];
+		} else {
+			// For numbers outside 0-9, just return the number as string
+			return String.valueOf(number);
+		}
+	}
+}
+>>>>>>> main
