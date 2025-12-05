@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import numberlettercountdatastoring.DataStoreApi;
-import numberlettercountdatastoring.DataRequest; // Need to import DataRequest
+import numberlettercountdatastoring.DataRequest; 
 import numberlettercountcomputing.ComputingApi;
-import numberlettercountcomputing.PassData; // Need to import PassData
+import numberlettercountcomputing.PassData; 
 
 public class FetchApiImpl implements FetchApi {
 	private static final Logger logger = Logger.getLogger(FetchApiImpl.class.getName());
