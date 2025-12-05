@@ -26,6 +26,6 @@ public class Checkpoint4TestSuite {
 		Assertions.assertTrue(allLines.size() == 1, 
 				"Make sure that the output is all written to one comma-separated line");
 		String[] results = allLines.get(0).split(",");
-		//Assertions.assertTrue(results.length == 3, "Make sure exactly one output is created for each input");
+		Assertions.assertTrue(results.length == 3, "Make sure exactly one output is created for each input");
 	}
 }
