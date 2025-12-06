@@ -43,26 +43,29 @@ public class FetchApiImpl implements FetchApi {
 				return List.of(-1);
 			}
 
-			// Validate and store each number
-			int validCount = 0;
+			List<Integer> letterCounts = new ArrayList<>(); // Store letter counts
+
+			// Process each number
 			for (Integer number : data) {
 				if (number == null) {
 					logger.warning("Skipping null number in request");
+					letterCounts.add(-1); // Error indicator
 					continue;
 				}
 
 				// Use internal validation
 				if (!validateNumber(number)) {
 					logger.warning("Skipping invalid number: " + number);
+					letterCounts.add(-1); // Error indicator
 					continue;
 				}
 
 				// Store the valid number
 				storedData.add(number);
-				validCount++;
 				logger.info("Stored number: " + number);
 
-				// If computingApi is available, process the number
+				// Get letter count from ComputingApi
+				int letterCount = -1;
 				if (computingApi != null) {
 					try {
 						// Create PassData from the number
@@ -71,32 +74,52 @@ public class FetchApiImpl implements FetchApi {
 						// Process the PassData to get results
 						List<Integer> computedResults = computingApi.processPassData(passData);
 
-						logger.info("Computed results for number " + number + ": " + computedResults);
+						if (computedResults != null && !computedResults.isEmpty()) {
+							// First result is the letter count
+							letterCount = computedResults.get(0);
+							logger.info("Letter count for number " + number + ": " + letterCount);
+						}
 
 						// If dataStoreApi is available, store the computed results
 						if (dataStoreApi != null && computedResults != null && !computedResults.isEmpty()) {
-							for (Integer result : computedResults) {
-								if (result != null) {
-									// Create DataRequest for each result
-									DataRequest dataRequest = new DataRequest(result);
-									int insertResult = dataStoreApi.insertRequest(dataRequest);
-									logger.info("DataStoreApi insert result for " + result + ": " + insertResult);
-								}
+							// Convert results to comma-separated string
+							StringBuilder dataContent = new StringBuilder();
+							for (int i = 0; i < computedResults.size(); i++) {
+								if (i > 0) dataContent.append(",");
+								dataContent.append(computedResults.get(i));
 							}
+
+							DataRequest dataRequest = new DataRequest(number, "FetchApi", dataContent.toString());
+							int insertResult = dataStoreApi.insertRequest(dataRequest);
+							logger.info("DataStoreApi insert result: " + insertResult);
 						}
 					} catch (Exception e) {
 						logger.warning("ComputingApi processing failed for number " + number + ": " + e.getMessage());
 					}
+				} else {
+					logger.warning("ComputingApi not available for number: " + number);
+				}
+
+				letterCounts.add(letterCount);
+			}
+
+			// Check if all results are errors
+			boolean allErrors = true;
+			for (Integer count : letterCounts) {
+				if (count != -1) {
+					allErrors = false;
+					break;
 				}
 			}
 
-			if (validCount == 0) {
-				logger.warning("No valid numbers found in request");
+			if (allErrors) {
+				logger.warning("No valid letter counts generated");
 				return List.of(-1);
 			}
 
-			logger.info("Successfully processed " + validCount + " numbers");
-			return new ArrayList<>(data); // Return defensive copy
+			logger.info("Successfully processed " + letterCounts.size() + " numbers");
+			logger.info("Letter counts: " + letterCounts);
+			return letterCounts; // Return letter counts, not original numbers!
 
 		} catch (Exception e) {
 			logger.severe("Error in insertRequest: " + e.getMessage());
@@ -207,7 +230,7 @@ public class FetchApiImpl implements FetchApi {
 			for (Integer result : computedResults) {
 				if (result != null) {
 					// Create DataRequest for each result
-					DataRequest dataRequest = new DataRequest(result);
+					DataRequest dataRequest = new DataRequest(result, "computed_result", result.toString());
 					int insertResult = dataStoreApi.insertRequest(dataRequest);
 
 					if (insertResult >= 0) { // Assuming non-negative return means success

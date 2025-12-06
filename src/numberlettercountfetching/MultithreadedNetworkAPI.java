@@ -3,11 +3,11 @@ package numberlettercountfetching;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.List;
 
-
 public class MultithreadedNetworkAPI implements FetchApi {
-	private static final int MAX_THREADS = 4; // Reasonable upper bound
+	private static final int MAX_THREADS = 4;
 	private final ExecutorService executor;
 	private final FetchApi delegate;
 
@@ -22,10 +22,11 @@ public class MultithreadedNetworkAPI implements FetchApi {
 		numberlettercountdatastoring.DataStoreApi dataStoreApi = new numberlettercountdatastoring.DataStoreApiImpl(computingApi);
 		FetchApiImpl fetchApi = new FetchApiImpl();
 		fetchApi.setDataStoreApi(dataStoreApi);
+		fetchApi.setComputingApi(computingApi); // ADD THIS LINE!
 		return fetchApi;
 	}
 
-
+	@Override
 	public List<Integer> insertRequest(FetchRequest fetchRequest) {
 		try {
 			Future<List<Integer>> future = executor.submit(() -> 
@@ -34,11 +35,11 @@ public class MultithreadedNetworkAPI implements FetchApi {
 			return future.get();
 		} catch (Exception e) {
 			System.err.println("Multithreaded processing error: " + e.getMessage());
-			return List.of(-1); // Error indicator
+			return List.of(-1);
 		}
 	}
 
-
+	@Override
 	public boolean validateNumber(int number) {
 		try {
 			Future<Boolean> future = executor.submit(() -> 
@@ -53,5 +54,14 @@ public class MultithreadedNetworkAPI implements FetchApi {
 
 	public void shutdown() {
 		executor.shutdown();
+		try {
+			if (!executor.awaitTermination(2, TimeUnit.SECONDS)) {
+				executor.shutdownNow();
+				executor.awaitTermination(1, TimeUnit.SECONDS);
+			}
+		} catch (InterruptedException e) {
+			executor.shutdownNow();
+			Thread.currentThread().interrupt();
+		}
 	}
 }

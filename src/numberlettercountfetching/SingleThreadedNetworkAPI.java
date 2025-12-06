@@ -1,4 +1,5 @@
 package numberlettercountfetching;
+
 import java.util.List;
 
 public class SingleThreadedNetworkAPI implements FetchApi {
@@ -9,11 +10,11 @@ public class SingleThreadedNetworkAPI implements FetchApi {
 	}
 
 	private FetchApi createDelegate() {
-		// Create the single-threaded implementation
 		numberlettercountcomputing.ComputingApi computingApi = new numberlettercountcomputing.ComputingApiImpl();
 		numberlettercountdatastoring.DataStoreApi dataStoreApi = new numberlettercountdatastoring.DataStoreApiImpl(computingApi);
 		FetchApiImpl fetchApi = new FetchApiImpl();
 		fetchApi.setDataStoreApi(dataStoreApi);
+		fetchApi.setComputingApi(computingApi); // ADD THIS LINE!
 		return fetchApi;
 	}
 
