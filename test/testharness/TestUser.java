@@ -54,7 +54,9 @@ public class TestUser {
 			// Write results
 			StringBuilder output = new StringBuilder();
 			for (int i = 0; i < results.size(); i++) {
-				if (i > 0) output.append(delimiter);
+				if (i > 0) {
+					output.append(delimiter);
+				}
 				output.append(results.get(i));
 			}
 
