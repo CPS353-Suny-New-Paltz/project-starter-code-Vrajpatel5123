@@ -85,7 +85,9 @@ public class FetchApiImpl implements FetchApi {
 							// Convert results to comma-separated string
 							StringBuilder dataContent = new StringBuilder();
 							for (int i = 0; i < computedResults.size(); i++) {
-								if (i > 0) dataContent.append(",");
+								if (i > 0) {
+									dataContent.append(",");
+								}
 								dataContent.append(computedResults.get(i));
 							}
 
