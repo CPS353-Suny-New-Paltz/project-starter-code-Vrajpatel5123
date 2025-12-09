@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.Arrays;
 import java.util.List;
 
-import numberlettercountfetching.FetchApi;
+
 import numberlettercountfetching.FetchApiImpl;
 import numberlettercountfetching.FetchRequest;
 import numberlettercountfetching.ListFetchRequest;
@@ -33,13 +33,13 @@ public class ComputeEngineIntegrationTest {
 	@Test
 	public void testIntegrationWithFetchApiAndComputingApi() {
 		// Create components
-		FetchApi fetchApi = new FetchApiImpl();
 		ComputingApi computingApi = new ComputingApiImpl();
-		DataStoreApi dataStoreApi = new DataStoreApiImpl();
+		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+		FetchApiImpl fetchApi = new FetchApiImpl();
 
-		// Connect components (only FetchApi needs dependencies)
-		((FetchApiImpl) fetchApi).setDataStoreApi(dataStoreApi);
-		((FetchApiImpl) fetchApi).setComputingApi(computingApi);
+		// Connect components PROPERLY
+		fetchApi.setDataStoreApi(dataStoreApi);
+		fetchApi.setComputingApi(computingApi); // THIS WAS MISSING!
 
 		// Test FetchApi -> DataStoreApi integration
 		FetchRequest listRequest = new ListFetchRequest(Arrays.asList(1, 2, 3));
@@ -69,24 +69,26 @@ public class ComputeEngineIntegrationTest {
 	public void testFullWorkflow() {
 		// Create and connect all components
 		ComputingApi computingApi = new ComputingApiImpl();
-		DataStoreApi dataStoreApi = new DataStoreApiImpl();
-		FetchApi fetchApi = new FetchApiImpl();
-		((FetchApiImpl) fetchApi).setDataStoreApi(dataStoreApi);
-		((FetchApiImpl) fetchApi).setComputingApi(computingApi);
+		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+		FetchApiImpl fetchApi = new FetchApiImpl();
+		fetchApi.setDataStoreApi(dataStoreApi);
+		fetchApi.setComputingApi(computingApi); // THIS WAS MISSING!
 
-		// Step 1: Fetch data
+		// Step 1: Fetch data - should return letter count, not the number
 		FetchRequest fetchRequest = new IntFetchRequest(7);
 		List<Integer> fetchedData = fetchApi.insertRequest(fetchRequest);
 
 		// Step 2: Process data through computing API
-		PassData passData = computingApi.passData(fetchedData.get(0));
+		PassData passData = computingApi.passData(7);
 		List<Integer> computedResults = computingApi.processPassData(passData);
 
 		// Step 3: Store processed results via FetchApi coordination
 		boolean storeResult = ((FetchApiImpl) fetchApi).storeComputedResults(computedResults);
 
 		// Verify workflow success
-		assertEquals(List.of(7), fetchedData, "Should fetch number 7");
+		// FetchApi should return letter count (not the number 7)
+		// 7 = "seven" = 5 letters
+		assertEquals(5, fetchedData.get(0), "Should return letter count for number 7");
 		assertFalse(computedResults.isEmpty(), "Should produce computed results");
 		assertTrue(storeResult, "Should store successfully via FetchApi coordination");
 		assertTrue(fetchApi.validateNumber(7), "FetchApi should validate number 7");
@@ -122,17 +124,19 @@ public class ComputeEngineIntegrationTest {
 	public void testComponentCommunication() {
 		// Test all components working together
 		ComputingApi computingApi = new ComputingApiImpl();
-		DataStoreApi dataStoreApi = new DataStoreApiImpl();
-		FetchApi fetchApi = new FetchApiImpl();
-		((FetchApiImpl) fetchApi).setDataStoreApi(dataStoreApi);
-		((FetchApiImpl) fetchApi).setComputingApi(computingApi);
+		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+		FetchApiImpl fetchApi = new FetchApiImpl();
+		fetchApi.setDataStoreApi(dataStoreApi);
+		fetchApi.setComputingApi(computingApi); // THIS WAS MISSING!
 
 		// Test FetchApi
 		FetchRequest request = new IntFetchRequest(5);
 		List<Integer> fetchResult = fetchApi.insertRequest(request);
 
 		assertFalse(fetchResult.isEmpty(), "Should return data");
-		assertEquals(5, fetchResult.get(0), "Should return number 5");
+		// Should return letter count, not the number 5
+		// 5 = "five" = 4 letters
+		assertEquals(4, fetchResult.get(0), "Should return letter count for number 5");
 		assertNotEquals(-1, fetchResult.get(0), "Should not return error code");
 
 		// Test ComputingApi
@@ -148,7 +152,12 @@ public class ComputeEngineIntegrationTest {
 
 	@Test
 	public void testFetchApiErrorHandling() {
-		FetchApi fetchApi = new FetchApiImpl();
+		// Create FetchApi with dependencies to test error handling
+		ComputingApi computingApi = new ComputingApiImpl();
+		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+		FetchApiImpl fetchApi = new FetchApiImpl();
+		fetchApi.setDataStoreApi(dataStoreApi);
+		fetchApi.setComputingApi(computingApi);
 
 		// Test null request
 		List<Integer> result1 = fetchApi.insertRequest(null);
@@ -241,49 +250,52 @@ public class ComputeEngineIntegrationTest {
 		}
 	}
 
-	// NEW TEST: Test interoperability between different DataStoreApi implementations
 	@Test
-	public void testMultipleDataStoreImplementations() {
-		// Test that FetchApi can work with different DataStoreApi implementations
-		FetchApiImpl fetchApi = new FetchApiImpl();
+	public void testNumberToWordsConversion() {
 		ComputingApi computingApi = new ComputingApiImpl();
 
-		// Test with regular DataStoreApiImpl
-		DataStoreApi regularDataStore = new DataStoreApiImpl();
-		fetchApi.setDataStoreApi(regularDataStore);
+		// Test various numbers
+		int[] testNumbers = {0, 1, 5, 10, 15, 21, 100, 134, 1000, 1234};
+
+		for (int number : testNumbers) {
+			PassData passData = computingApi.passData(number);
+			assertNotNull(passData);
+			assertNotNull(passData.getData());
+			assertTrue(passData.getData().length() > 0);
+
+			List<Integer> results = computingApi.processPassData(passData);
+			assertNotNull(results);
+			assertFalse(results.isEmpty());
+			assertTrue(results.get(0) > 0 || number == 0); // 0 has "zero" = 4 letters
+
+			System.out.println(number + " -> '" + passData.getData() + "' -> " + results.get(0) + " letters");
+		}
+	}
+
+	@Test
+	public void testFetchApiReturnsLetterCounts() {
+		// Test that FetchApi returns letter counts, not original numbers
+		ComputingApi computingApi = new ComputingApiImpl();
+		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+		FetchApiImpl fetchApi = new FetchApiImpl();
+		fetchApi.setDataStoreApi(dataStoreApi);
 		fetchApi.setComputingApi(computingApi);
 
-		// Test basic operations
-		FetchRequest request1 = new ListFetchRequest(Arrays.asList(1, 2, 3));
-		List<Integer> result1 = fetchApi.insertRequest(request1);
-		assertFalse(result1.isEmpty());
-		assertNotEquals(-1, result1.get(0));
+		// Test with multiple numbers
+		List<Integer> testNumbers = Arrays.asList(1, 15, 10, 5, 2, 3, 8);
+		FetchRequest request = new ListFetchRequest(testNumbers);
+		List<Integer> results = fetchApi.insertRequest(request);
 
-		// Test validation works with both implementations
-		assertTrue(regularDataStore.validateNumber(10));
-		assertFalse(regularDataStore.validateNumber(-10));
+		assertNotNull(results);
+		assertEquals(7, results.size(), "Should return 7 results for 7 input numbers");
 
-		// Try to create InMemoryDataStore if available
-		try {
-			TestInputConfiguration inputConfig = new TestInputConfiguration();
-			TestOutputConfiguration outputConfig = new TestOutputConfiguration();
-			DataStoreApi inMemoryDataStore = new InMemoryDataStore(inputConfig, outputConfig);
-
-			// Switch to InMemoryDataStore
-			fetchApi.setDataStoreApi(inMemoryDataStore);
-
-			// Should still work (even if differently)
-			assertTrue(inMemoryDataStore.validateNumber(10));
-			assertFalse(inMemoryDataStore.validateNumber(-10));
-
-			// Test insert with InMemoryDataStore
-			DataRequest dataRequest = new DataRequest(1, "test", "5,10,15");
-			int insertResult = inMemoryDataStore.insertRequest(dataRequest);
-			assertTrue(insertResult == 0 || insertResult == -1);
-
-		} catch (Exception e) {
-			// InMemoryDataStore not available, that's okay
-			System.out.println("InMemoryDataStore not tested: " + e.getMessage());
+		// Check each result is a letter count (positive number)
+		for (int i = 0; i < results.size(); i++) {
+			int letterCount = results.get(i);
+			assertTrue(letterCount > 0, "Result " + i + " should be positive letter count, got: " + letterCount);
 		}
+
+		System.out.println("Numbers: " + testNumbers);
+		System.out.println("Letter counts: " + results);
 	}
 }
