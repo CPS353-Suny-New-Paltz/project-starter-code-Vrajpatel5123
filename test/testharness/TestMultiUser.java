@@ -43,53 +43,53 @@ public class TestMultiUser {
 	@Test
 	public void compareMultiAndSingleThreaded() throws Exception {
 		int numThreads = 4; // Match MAX_THREADS=4
-				List<TestUser> singleThreadedUsers = new ArrayList<>();
-				List<TestUser> multiThreadedUsers = new ArrayList<>();
+		List<TestUser> singleThreadedUsers = new ArrayList<>();
+		List<TestUser> multiThreadedUsers = new ArrayList<>();
 
-				// Create users for both implementations
-				for (int i = 0; i < numThreads; i++) {
-					singleThreadedUsers.add(new TestUser(singleThreadedAPI));
-					multiThreadedUsers.add(new TestUser(networkAPI));
-				}
+		// Create users for both implementations
+		for (int i = 0; i < numThreads; i++) {
+			singleThreadedUsers.add(new TestUser(singleThreadedAPI));
+			multiThreadedUsers.add(new TestUser(networkAPI));
+		}
 
-				// Run single threaded
-				String singleThreadFilePrefix = "testMultiUser.compareMultiAndSingleThreaded.test.singleThreadOut.tmp";
-				for (int i = 0; i < numThreads; i++) {
-					File singleThreadedOut = new File(singleThreadFilePrefix + i);
-					singleThreadedOut.deleteOnExit();
-					singleThreadedUsers.get(i).run(singleThreadedOut.getCanonicalPath());
-				}
+		// Run single threaded
+		String singleThreadFilePrefix = "testMultiUser.compareMultiAndSingleThreaded.test.singleThreadOut.tmp";
+		for (int i = 0; i < numThreads; i++) {
+			File singleThreadedOut = new File(singleThreadFilePrefix + i);
+			singleThreadedOut.deleteOnExit();
+			singleThreadedUsers.get(i).run(singleThreadedOut.getCanonicalPath());
+		}
 
-				// Run multi threaded using thread pool
-				ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
-				List<Future<?>> results = new ArrayList<>();
-				String multiThreadFilePrefix = "testMultiUser.compareMultiAndSingleThreaded.test.multiThreadOut.tmp";
+		// Run multi threaded using thread pool
+		ExecutorService threadPool = Executors.newFixedThreadPool(numThreads);
+		List<Future<?>> results = new ArrayList<>();
+		String multiThreadFilePrefix = "testMultiUser.compareMultiAndSingleThreaded.test.multiThreadOut.tmp";
 
-				for (int i = 0; i < numThreads; i++) {
-					File multiThreadedOut = new File(multiThreadFilePrefix + i);
-					multiThreadedOut.deleteOnExit();
-					String multiThreadOutputPath = multiThreadedOut.getCanonicalPath();
-					TestUser testUser = multiThreadedUsers.get(i);
-					results.add(threadPool.submit(() -> testUser.run(multiThreadOutputPath)));
-				}
+		for (int i = 0; i < numThreads; i++) {
+			File multiThreadedOut = new File(multiThreadFilePrefix + i);
+			multiThreadedOut.deleteOnExit();
+			String multiThreadOutputPath = multiThreadedOut.getCanonicalPath();
+			TestUser testUser = multiThreadedUsers.get(i);
+			results.add(threadPool.submit(() -> testUser.run(multiThreadOutputPath)));
+		}
 
-				// Wait for all threads to complete
-				for (Future<?> future : results) {
-					try {
-						future.get();
-					} catch (Exception e) {
-						throw new RuntimeException(e);
-					}
-				}
+		// Wait for all threads to complete
+		for (Future<?> future : results) {
+			try {
+				future.get();
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
 
-				threadPool.shutdown();
+		threadPool.shutdown();
 
-				// Check that the output is the same for multi-threaded and single-threaded
-				List<String> singleThreaded = loadAllOutput(singleThreadFilePrefix, numThreads);
-				List<String> multiThreaded = loadAllOutput(multiThreadFilePrefix, numThreads);
+		// Check that the output is the same for multi-threaded and single-threaded
+		List<String> singleThreaded = loadAllOutput(singleThreadFilePrefix, numThreads);
+		List<String> multiThreaded = loadAllOutput(multiThreadFilePrefix, numThreads);
 
-				assertEquals(singleThreaded, multiThreaded, 
-						"Multi-threaded and single-threaded outputs should match");
+		assertEquals(singleThreaded, multiThreaded, 
+				"Multi-threaded and single-threaded outputs should match");
 	}
 
 	@Test

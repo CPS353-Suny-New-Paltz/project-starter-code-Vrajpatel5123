@@ -3,7 +3,6 @@ package integration;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -270,7 +269,7 @@ public class ComputeEngineIntegrationTest {
 			assertFalse(results.isEmpty());
 			assertTrue(results.get(0) > 0 || number == 0); // 0 has "zero" = 4 letters
 
-					System.out.println(number + " -> '" + passData.getData() + "' -> " + results.get(0) + " letters");
+			System.out.println(number + " -> '" + passData.getData() + "' -> " + results.get(0) + " letters");
 		}
 	}
 
