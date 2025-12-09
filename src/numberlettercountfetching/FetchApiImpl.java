@@ -301,22 +301,35 @@ public class FetchApiImpl implements FetchApi {
 
 		int storedCount = 0;
 		try {
-			for (Integer result : computedResults) {
-				if (result != null) {
-					// Create DataRequest for each result
-					DataRequest dataRequest = new DataRequest(result);
-					int insertResult = dataStoreApi.insertRequest(dataRequest);
-
-					if (insertResult >= 0) { // Assuming non-negative return means success
-						storedCount++;
-						logger.info("Successfully stored computed result: " + result);
-					} else {
-						logger.warning("Failed to store computed result: " + result);
+			// Convert all computed results to a comma-separated string
+			StringBuilder dataContent = new StringBuilder();
+			for (int i = 0; i < computedResults.size(); i++) {
+				if (computedResults.get(i) != null) {
+					if (i > 0 && dataContent.length() > 0) {
+						dataContent.append(",");
 					}
+					dataContent.append(computedResults.get(i));
 				}
 			}
-			logger.info("Stored " + storedCount + " computed results via DataStoreApi");
-			return storedCount > 0;
+
+			// Create a single DataRequest with all results
+			if (dataContent.length() > 0) {
+				DataRequest dataRequest = new DataRequest(1, "computed_results", dataContent.toString());
+				int insertResult = dataStoreApi.insertRequest(dataRequest);
+
+				if (insertResult > 0) {
+					storedCount = insertResult; // Number of items stored
+					logger.info("Successfully stored " + storedCount + " computed results");
+					return true;
+				} else {
+					logger.warning("Failed to store computed results, insertResult: " + insertResult);
+					return false;
+				}
+			} else {
+				logger.warning("No valid computed results to store");
+				return false;
+			}
+
 		} catch (Exception e) {
 			logger.severe("Error storing computed results: " + e.getMessage());
 			return false;
