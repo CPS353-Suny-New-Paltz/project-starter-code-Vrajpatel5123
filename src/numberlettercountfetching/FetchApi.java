@@ -1,10 +1,11 @@
 package numberlettercountfetching;
 
+import java.math.BigInteger;
 import java.util.List;
 import project.annotations.NetworkAPI;
 
 @NetworkAPI
 public interface FetchApi {
-	List<Integer> insertRequest(FetchRequest fetchRequest);
-	boolean validateNumber(int number);
+	List<BigInteger> insertRequest(FetchRequest fetchRequest);
+	boolean validateNumber(BigInteger number);
 }

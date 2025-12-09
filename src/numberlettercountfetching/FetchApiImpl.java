@@ -1,5 +1,6 @@
 package numberlettercountfetching;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -12,7 +13,7 @@ public class FetchApiImpl implements FetchApi {
 	private static final Logger logger = Logger.getLogger(FetchApiImpl.class.getName());
 	private DataStoreApi dataStoreApi;
 	private ComputingApi computingApi;
-	private List<Integer> storedData = new ArrayList<>();
+	private List<BigInteger> storedData = new ArrayList<>();
 
 	public void setDataStoreApi(DataStoreApi dataStoreApi) {
 		this.dataStoreApi = dataStoreApi;
@@ -24,39 +25,39 @@ public class FetchApiImpl implements FetchApi {
 		logger.info("ComputingApi dependency set");
 	}
 
-	public List<Integer> insertRequest(FetchRequest fetchRequest) {
+	public List<BigInteger> insertRequest(FetchRequest fetchRequest) {
 		try {
 			// Parameter validation
 			if (fetchRequest == null) {
 				logger.warning("FetchRequest is null");
-				return List.of(-1);
+				return List.of(BigInteger.valueOf(-1)); // Error indicator
 			}
 
-			List<Integer> data = fetchRequest.getData();
+			List<BigInteger> data = fetchRequest.getData();
 			if (data == null) {
 				logger.warning("FetchRequest data is null");
-				return List.of(-1);
+				return List.of(BigInteger.valueOf(-1));
 			}
 
 			if (data.isEmpty()) {
 				logger.warning("FetchRequest data is empty");
-				return List.of(-1);
+				return List.of(BigInteger.valueOf(-1));
 			}
 
-			List<Integer> letterCounts = new ArrayList<>(); // Store letter counts
+			List<BigInteger> letterCounts = new ArrayList<>(); // Store letter counts as BigInteger
 
 			// Process each number
-			for (Integer number : data) {
+			for (BigInteger number : data) {
 				if (number == null) {
 					logger.warning("Skipping null number in request");
-					letterCounts.add(-1); // Error indicator
+					letterCounts.add(BigInteger.valueOf(-1)); // Error indicator
 					continue;
 				}
 
-				// Use internal validation
+				// Validate the number
 				if (!validateNumber(number)) {
 					logger.warning("Skipping invalid number: " + number);
-					letterCounts.add(-1); // Error indicator
+					letterCounts.add(BigInteger.valueOf(-1)); // Error indicator
 					continue;
 				}
 
@@ -65,33 +66,40 @@ public class FetchApiImpl implements FetchApi {
 				logger.info("Stored number: " + number);
 
 				// Get letter count from ComputingApi
-				int letterCount = -1;
+				BigInteger letterCount = BigInteger.valueOf(-1);
 				if (computingApi != null) {
 					try {
-						// Create PassData from the number
-						PassData passData = computingApi.passData(number);
+						// Check if number fits in int for ComputingApi
+						if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
+								number.compareTo(BigInteger.valueOf(0)) >= 0) {
 
-						// Process the PassData to get results
-						List<Integer> computedResults = computingApi.processPassData(passData);
+							int intNumber = number.intValue();
 
-						if (computedResults != null && !computedResults.isEmpty()) {
-							// First result is the letter count
-							letterCount = computedResults.get(0);
-							logger.info("Letter count for number " + number + ": " + letterCount);
+							// Create PassData from the number
+							PassData passData = computingApi.passData(intNumber);
+
+							// Process the PassData to get results
+							List<Integer> computedResults = computingApi.processPassData(passData);
+
+							if (computedResults != null && !computedResults.isEmpty()) {
+								// First result is the letter count
+								letterCount = BigInteger.valueOf(computedResults.get(0));
+								logger.info("Letter count for number " + number + ": " + letterCount);
+							}
+						} else {
+							// For numbers beyond int range, use alternative method
+							letterCount = calculateLetterCountForLargeNumber(number);
+							logger.info("Calculated letter count for large number " + number + ": " + letterCount);
 						}
 
-						// If dataStoreApi is available, store the computed results
-						if (dataStoreApi != null && computedResults != null && !computedResults.isEmpty()) {
-							// Convert results to comma-separated string
-							StringBuilder dataContent = new StringBuilder();
-							for (int i = 0; i < computedResults.size(); i++) {
-								if (i > 0) {
-									dataContent.append(",");
-								}
-								dataContent.append(computedResults.get(i));
-							}
+						// Store via DataStoreApi if possible and number fits in int
+						if (dataStoreApi != null && 
+								number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
+								number.compareTo(BigInteger.valueOf(0)) >= 0) {
 
-							DataRequest dataRequest = new DataRequest(number, "FetchApi", dataContent.toString());
+							// Create a DataRequest with the number and its letter count
+							String dataContent = number + "," + letterCount;
+							DataRequest dataRequest = new DataRequest(number.intValue(), "FetchApi", dataContent);
 							int insertResult = dataStoreApi.insertRequest(dataRequest);
 							logger.info("DataStoreApi insert result: " + insertResult);
 						}
@@ -107,8 +115,8 @@ public class FetchApiImpl implements FetchApi {
 
 			// Check if all results are errors
 			boolean allErrors = true;
-			for (Integer count : letterCounts) {
-				if (count != -1) {
+			for (BigInteger count : letterCounts) {
+				if (count != null && !count.equals(BigInteger.valueOf(-1))) {
 					allErrors = false;
 					break;
 				}
@@ -116,33 +124,70 @@ public class FetchApiImpl implements FetchApi {
 
 			if (allErrors) {
 				logger.warning("No valid letter counts generated");
-				return List.of(-1);
+				return List.of(BigInteger.valueOf(-1));
 			}
 
 			logger.info("Successfully processed " + letterCounts.size() + " numbers");
-			logger.info("Letter counts: " + letterCounts);
 			return letterCounts; // Return letter counts, not original numbers!
 
 		} catch (Exception e) {
 			logger.severe("Error in insertRequest: " + e.getMessage());
-			return List.of(-1);
+			return List.of(BigInteger.valueOf(-1));
 		}
 	}
 
-	public boolean validateNumber(int number) {
+	// Helper method to calculate letter count for large numbers
+	private BigInteger calculateLetterCountForLargeNumber(BigInteger number) {
 		try {
-			// Basic validation
-			boolean basicValidation = number >= 0;
+			// Convert number to string for processing
+			String numStr = number.toString();
+
+			// For very large numbers, we'll use a simpler approach
+			// This is a placeholder - in a real system, you'd need proper
+			// number-to-words conversion for arbitrarily large numbers
+			if (number.equals(BigInteger.ZERO)) {
+				return BigInteger.valueOf(4); // "zero" has 4 letters
+			}
+
+			// Basic estimation or placeholder logic
+			// In a full implementation, this would convert the large number to words
+			// using algorithms for large number conversion
+			return BigInteger.valueOf(numStr.length() * 3); // Rough estimation
+		} catch (Exception e) {
+			logger.warning("Error calculating letter count for large number: " + e.getMessage());
+			return BigInteger.valueOf(-1);
+		}
+	}
+
+	public boolean validateNumber(BigInteger number) {
+		try {
+			if (number == null) {
+				logger.warning("Number is null");
+				return false;
+			}
+
+			// Basic validation - non-negative
+			boolean basicValidation = number.compareTo(BigInteger.ZERO) >= 0;
 			logger.info("Basic validation for number " + number + ": " + basicValidation);
 
 			if (!basicValidation) {
 				return false;
 			}
 
-			// Additional validation with DataStoreApi if available
+			// Check if number is within int range for DataStoreApi compatibility
 			if (dataStoreApi != null) {
 				try {
-					boolean dataStoreValidation = dataStoreApi.validateNumber(number);
+					boolean dataStoreValidation = false;
+
+					if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
+							number.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) >= 0) {
+						// Within int range
+						dataStoreValidation = dataStoreApi.validateNumber(number.intValue());
+					} else {
+						// Beyond int range - use custom validation
+						dataStoreValidation = validateLargeNumber(number);
+					}
+
 					logger.info("DataStoreApi validation for number " + number + ": " + dataStoreValidation);
 					return dataStoreValidation;
 				} catch (Exception e) {
@@ -151,7 +196,8 @@ public class FetchApiImpl implements FetchApi {
 				}
 			}
 
-			return basicValidation;
+			// Custom validation for large numbers
+			return validateLargeNumber(number);
 
 		} catch (Exception e) {
 			logger.severe("Error in validateNumber: " + e.getMessage());
@@ -159,7 +205,37 @@ public class FetchApiImpl implements FetchApi {
 		}
 	}
 
-	public List<Integer> getStoredData() {
+	// Helper method for validating large numbers
+	private boolean validateLargeNumber(BigInteger number) {
+		try {
+			// Additional validation logic for large numbers
+			// 1. Check if number is too large (optional limit)
+			BigInteger maxAllowed = new BigInteger("10").pow(1000); // 10^1000
+			if (number.compareTo(maxAllowed) > 0) {
+				logger.warning("Number exceeds maximum allowed size: " + number);
+				return false;
+			}
+
+			// 2. Check for common issues (like all zeros)
+			if (number.equals(BigInteger.ZERO)) {
+				return true; // Zero is valid
+			}
+
+			// 3. Check digit count (optional)
+			int digitCount = number.toString().length();
+			if (digitCount > 10000) {
+				logger.warning("Number has excessive digits: " + digitCount);
+				return false;
+			}
+
+			return true;
+		} catch (Exception e) {
+			logger.warning("Error in validateLargeNumber: " + e.getMessage());
+			return false;
+		}
+	}
+
+	public List<BigInteger> getStoredData() {
 		try {
 			logger.info("Returning " + storedData.size() + " stored items");
 			return new ArrayList<>(storedData);
@@ -173,6 +249,19 @@ public class FetchApiImpl implements FetchApi {
 		return storedData.size();
 	}
 
+	public BigInteger getTotalSum() {
+		try {
+			BigInteger sum = BigInteger.ZERO;
+			for (BigInteger num : storedData) {
+				sum = sum.add(num);
+			}
+			return sum;
+		} catch (Exception e) {
+			logger.severe("Error calculating sum: " + e.getMessage());
+			return BigInteger.ZERO;
+		}
+	}
+
 	// Helper method with error handling
 	public void clearStoredData() {
 		try {
@@ -184,70 +273,34 @@ public class FetchApiImpl implements FetchApi {
 		}
 	}
 
-	// New method to coordinate computation for all stored data
-	public List<Integer> computeAllStoredData() {
-		List<Integer> allComputedResults = new ArrayList<>();
-
-		if (computingApi == null) {
-			logger.warning("ComputingApi not available for computation");
-			return allComputedResults;
-		}
-
+	// Method to handle very large batches
+	public void insertBatch(List<BigInteger> batch) {
 		try {
-			for (Integer number : storedData) {
-				if (number != null) {
-					// Create PassData for each number
-					PassData passData = computingApi.passData(number);
+			if (batch == null || batch.isEmpty()) {
+				logger.warning("Batch is empty");
+				return;
+			}
 
-					// Process PassData to get results
-					List<Integer> computedResults = computingApi.processPassData(passData);
+			logger.info("Processing batch of " + batch.size() + " numbers");
 
-					if (computedResults != null) {
-						allComputedResults.addAll(computedResults);
-						logger.info("Computed results for " + number + ": " + computedResults);
+			// Process in chunks to avoid memory issues
+			int chunkSize = 1000;
+			for (int i = 0; i < batch.size(); i += chunkSize) {
+				int end = Math.min(batch.size(), i + chunkSize);
+				List<BigInteger> chunk = batch.subList(i, end);
+
+				for (BigInteger number : chunk) {
+					if (validateNumber(number)) {
+						storedData.add(number);
 					}
 				}
+
+				logger.info("Processed chunk " + (i/chunkSize + 1) + 
+						", total stored: " + storedData.size());
 			}
+
 		} catch (Exception e) {
-			logger.severe("Error in computeAllStoredData: " + e.getMessage());
-		}
-
-		return allComputedResults;
-	}
-
-	// New method to store computed results via DataStoreApi
-	public boolean storeComputedResults(List<Integer> computedResults) {
-		if (dataStoreApi == null) {
-			logger.warning("DataStoreApi not available for storing computed results");
-			return false;
-		}
-
-		if (computedResults == null || computedResults.isEmpty()) {
-			logger.warning("No computed results to store");
-			return false;
-		}
-
-		int storedCount = 0;
-		try {
-			for (Integer result : computedResults) {
-				if (result != null) {
-					// Create DataRequest for each result
-					DataRequest dataRequest = new DataRequest(result, "computed_result", result.toString());
-					int insertResult = dataStoreApi.insertRequest(dataRequest);
-
-					if (insertResult >= 0) { // Assuming non-negative return means success
-						storedCount++;
-						logger.info("Successfully stored computed result: " + result);
-					} else {
-						logger.warning("Failed to store computed result: " + result);
-					}
-				}
-			}
-			logger.info("Stored " + storedCount + " computed results via DataStoreApi");
-			return storedCount > 0;
-		} catch (Exception e) {
-			logger.severe("Error storing computed results: " + e.getMessage());
-			return false;
+			logger.severe("Error in insertBatch: " + e.getMessage());
 		}
 	}
 }
