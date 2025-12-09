@@ -4,6 +4,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.math.BigInteger;
 import java.util.List;
 
 public class MultithreadedNetworkAPI implements FetchApi {
@@ -22,25 +23,25 @@ public class MultithreadedNetworkAPI implements FetchApi {
 		numberlettercountdatastoring.DataStoreApi dataStoreApi = new numberlettercountdatastoring.DataStoreApiImpl();
 		FetchApiImpl fetchApi = new FetchApiImpl();
 		fetchApi.setDataStoreApi(dataStoreApi);
-		fetchApi.setComputingApi(computingApi); // ADD THIS LINE!
+		fetchApi.setComputingApi(computingApi);
 		return fetchApi;
 	}
 
 	@Override
-	public List<Integer> insertRequest(FetchRequest fetchRequest) {
+	public List<BigInteger> insertRequest(FetchRequest fetchRequest) {
 		try {
-			Future<List<Integer>> future = executor.submit(() -> 
+			Future<List<BigInteger>> future = executor.submit(() -> 
 			delegate.insertRequest(fetchRequest)
 					);
 			return future.get();
 		} catch (Exception e) {
 			System.err.println("Multithreaded processing error: " + e.getMessage());
-			return List.of(-1);
+			return List.of(BigInteger.valueOf(-1));
 		}
 	}
 
-	@Override
-	public boolean validateNumber(int number) {
+
+	public boolean validateNumber(BigInteger number) {
 		try {
 			Future<Boolean> future = executor.submit(() -> 
 			delegate.validateNumber(number)

@@ -1,13 +1,14 @@
 package numberlettercountfetching;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class ListFetchRequest extends FetchRequest {
-	public ListFetchRequest(List<Integer> numbers) {
-		super(numbers);
+	public ListFetchRequest(List<BigInteger> list) {
+		super(list);
 	}
 
-	public List<Integer> getListData() {
+	public List<BigInteger> getListData() {
 		return getData();
 	}
 }

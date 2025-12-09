@@ -2,10 +2,11 @@ package testharness;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 //will correct for checkpoint 6
@@ -30,25 +31,25 @@ public class TestUser {
 				return;
 			}
 
-			// Parse numbers (format: "1,15,10,5,2,3,8")
+			// Parse numbers as BigInteger
 			String[] numberStrings = lines.get(0).split(",");
-			Integer[] numbers = new Integer[numberStrings.length];
-			for (int i = 0; i < numberStrings.length; i++) {
+			List<BigInteger> numbers = new ArrayList<>();
+			for (String numStr : numberStrings) {
 				try {
-					numbers[i] = Integer.parseInt(numberStrings[i].trim());
+					numbers.add(new BigInteger(numStr.trim()));
 				} catch (NumberFormatException e) {
-					writeError(outputPath, "Invalid number: " + numberStrings[i]);
+					writeError(outputPath, "Invalid number: " + numStr);
 					return;
 				}
 			}
 
 			// Create request and process
-			numberlettercountfetching.ListFetchRequest request = 
-					new numberlettercountfetching.ListFetchRequest(Arrays.asList(numbers));
+			numberlettercountfetching.FetchRequest request = 
+					new numberlettercountfetching.FetchRequest(numbers);
 
-			List<Integer> results = coordinator.insertRequest(request);
+			List<BigInteger> results = coordinator.insertRequest(request);
 
-			if (results.isEmpty() || results.get(0) == -1) {
+			if (results.isEmpty() || results.get(0).equals(BigInteger.valueOf(-1))) {
 				writeError(outputPath, "Failed to process request");
 				return;
 			}

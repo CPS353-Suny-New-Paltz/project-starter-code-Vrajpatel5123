@@ -1,5 +1,6 @@
 package numberlettercountfetching;
 
+import java.math.BigInteger;
 import java.util.List;
 
 public class SingleThreadedNetworkAPI implements FetchApi {
@@ -14,17 +15,17 @@ public class SingleThreadedNetworkAPI implements FetchApi {
 		numberlettercountdatastoring.DataStoreApi dataStoreApi = new numberlettercountdatastoring.DataStoreApiImpl();
 		FetchApiImpl fetchApi = new FetchApiImpl();
 		fetchApi.setDataStoreApi(dataStoreApi);
-		fetchApi.setComputingApi(computingApi); // ADD THIS LINE!
+		fetchApi.setComputingApi(computingApi);
 		return fetchApi;
 	}
 
-
-	public List<Integer> insertRequest(FetchRequest fetchRequest) {
+	
+	public List<BigInteger> insertRequest(FetchRequest fetchRequest) {
 		return delegate.insertRequest(fetchRequest);
 	}
 
-
-	public boolean validateNumber(int number) {
+	
+	public boolean validateNumber(BigInteger number) {
 		return delegate.validateNumber(number);
 	}
 }
