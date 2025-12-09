@@ -11,7 +11,7 @@ public class SingleThreadedNetworkAPI implements FetchApi {
 
 	private FetchApi createDelegate() {
 		numberlettercountcomputing.ComputingApi computingApi = new numberlettercountcomputing.ComputingApiImpl();
-		numberlettercountdatastoring.DataStoreApi dataStoreApi = new numberlettercountdatastoring.DataStoreApiImpl(computingApi);
+		numberlettercountdatastoring.DataStoreApi dataStoreApi = new numberlettercountdatastoring.DataStoreApiImpl();
 		FetchApiImpl fetchApi = new FetchApiImpl();
 		fetchApi.setDataStoreApi(dataStoreApi);
 		fetchApi.setComputingApi(computingApi); // ADD THIS LINE!

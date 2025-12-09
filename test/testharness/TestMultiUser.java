@@ -21,7 +21,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-
+//will correct for checkpoint 6
 public class TestMultiUser {
 
 	// Remove the unused coordinator field
