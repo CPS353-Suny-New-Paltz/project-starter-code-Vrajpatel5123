@@ -87,7 +87,9 @@ public class ComputeEngineIntegrationTest {
 		// Let's store results manually to test the workflow
 		StringBuilder dataContent = new StringBuilder();
 		for (int i = 0; i < computedResults.size(); i++) {
-			if (i > 0) dataContent.append(",");
+			if (i > 0) {
+				dataContent.append(",");
+			}
 			dataContent.append(computedResults.get(i));
 		}
 		DataRequest storeRequest = new DataRequest(1, "computed_results", dataContent.toString());
