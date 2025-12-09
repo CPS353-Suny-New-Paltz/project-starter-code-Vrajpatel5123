@@ -7,13 +7,11 @@ import numberlettercountdatastoring.DataStoreApi;
 import numberlettercountdatastoring.DataRequest; 
 import numberlettercountcomputing.ComputingApi;
 import numberlettercountcomputing.PassData; 
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-
 
 public class FetchApiImpl implements FetchApi {
 	private static final Logger logger = Logger.getLogger(FetchApiImpl.class.getName());
@@ -37,7 +35,6 @@ public class FetchApiImpl implements FetchApi {
 		this.computingApi = computingApi;
 		logger.info("ComputingApi dependency set");
 	}
-
 
 	// CoordinatorAPI methods
 	public boolean processFile(String inputFile, String outputFile) {
@@ -151,7 +148,6 @@ public class FetchApiImpl implements FetchApi {
 	}
 
 	// Original FetchApi methods
-
 	public List<Integer> insertRequest(FetchRequest fetchRequest) {
 		try {
 			// Parameter validation
@@ -182,9 +178,6 @@ public class FetchApiImpl implements FetchApi {
 				// Use internal validation
 				if (!validateNumber(number)) {
 					logger.warning("Skipping invalid number: " + number);
-
-					letterCounts.add(-1); // Error indicator
-
 					continue;
 				}
 
@@ -192,66 +185,10 @@ public class FetchApiImpl implements FetchApi {
 				storedData.add(number);
 				validCount++;
 				logger.info("Stored number: " + number);
-
 			}
 
 			if (validCount == 0) {
 				logger.warning("No valid numbers found in request");
-
-
-				// Get letter count from ComputingApi
-				int letterCount = -1;
-				if (computingApi != null) {
-					try {
-						// Create PassData from the number
-						PassData passData = computingApi.passData(number);
-
-						// Process the PassData to get results
-						List<Integer> computedResults = computingApi.processPassData(passData);
-
-						if (computedResults != null && !computedResults.isEmpty()) {
-							// First result is the letter count
-							letterCount = computedResults.get(0);
-							logger.info("Letter count for number " + number + ": " + letterCount);
-						}
-
-						// If dataStoreApi is available, store the computed results
-						if (dataStoreApi != null && computedResults != null && !computedResults.isEmpty()) {
-							// Convert results to comma-separated string
-							StringBuilder dataContent = new StringBuilder();
-							for (int i = 0; i < computedResults.size(); i++) {
-								if (i > 0) {
-									dataContent.append(",");
-								}
-								dataContent.append(computedResults.get(i));
-							}
-
-							DataRequest dataRequest = new DataRequest(number, "FetchApi", dataContent.toString());
-							int insertResult = dataStoreApi.insertRequest(dataRequest);
-							logger.info("DataStoreApi insert result: " + insertResult);
-						}
-					} catch (Exception e) {
-						logger.warning("ComputingApi processing failed for number " + number + ": " + e.getMessage());
-					}
-				} else {
-					logger.warning("ComputingApi not available for number: " + number);
-				}
-
-				letterCounts.add(letterCount);
-			}
-
-			// Check if all results are errors
-			boolean allErrors = true;
-			for (Integer count : letterCounts) {
-				if (count != -1) {
-					allErrors = false;
-					break;
-				}
-			}
-
-			if (allErrors) {
-				logger.warning("No valid letter counts generated");
-
 				return List.of(-1);
 			}
 
@@ -364,18 +301,10 @@ public class FetchApiImpl implements FetchApi {
 
 		int storedCount = 0;
 		try {
-
-			// Convert all computed results to a comma-separated string
-			StringBuilder dataContent = new StringBuilder();
-			for (int i = 0; i < computedResults.size(); i++) {
-				if (computedResults.get(i) != null) {
-					if (i > 0 && dataContent.length() > 0) {
-						dataContent.append(",");
-
 			for (Integer result : computedResults) {
 				if (result != null) {
 					// Create DataRequest for each result
-					DataRequest dataRequest = new DataRequest(result, "computed_result", result.toString());
+					DataRequest dataRequest = new DataRequest(result);
 					int insertResult = dataStoreApi.insertRequest(dataRequest);
 
 					if (insertResult >= 0) { // Assuming non-negative return means success
@@ -383,30 +312,11 @@ public class FetchApiImpl implements FetchApi {
 						logger.info("Successfully stored computed result: " + result);
 					} else {
 						logger.warning("Failed to store computed result: " + result);
-
 					}
-					dataContent.append(computedResults.get(i));
 				}
 			}
-
-			// Create a single DataRequest with all results
-			if (dataContent.length() > 0) {
-				DataRequest dataRequest = new DataRequest(1, "computed_results", dataContent.toString());
-				int insertResult = dataStoreApi.insertRequest(dataRequest);
-
-				if (insertResult > 0) {
-					storedCount = insertResult; // Number of items stored
-					logger.info("Successfully stored " + storedCount + " computed results");
-					return true;
-				} else {
-					logger.warning("Failed to store computed results, insertResult: " + insertResult);
-					return false;
-				}
-			} else {
-				logger.warning("No valid computed results to store");
-				return false;
-			}
-
+			logger.info("Stored " + storedCount + " computed results via DataStoreApi");
+			return storedCount > 0;
 		} catch (Exception e) {
 			logger.severe("Error storing computed results: " + e.getMessage());
 			return false;
