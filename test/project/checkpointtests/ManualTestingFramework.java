@@ -1,7 +1,10 @@
 package project.checkpointtests;
 
-import numberlettercountfetching.CoordinatorAPI;
-import numberlettercountfetching.CoordinatorApiImpl;
+import numberlettercountfetching.FetchApiImpl;
+import numberlettercountcomputing.ComputingApi;
+import numberlettercountcomputing.ComputingApiImpl;
+import numberlettercountdatastoring.DataStoreApi;
+import numberlettercountdatastoring.DataStoreApiImpl;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,15 +26,25 @@ public class ManualTestingFramework {
 				StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 		System.out.println("✓ Created input file: " + INPUT);
 
-		// 2. Create Coordinator API (which internally creates all 3 APIs)
-		CoordinatorAPI coordinator = new CoordinatorApiImpl();
-		System.out.println("✓ Created Coordinator API with all 3 components");
+		// 2. Create FetchApiImpl (which now includes CoordinatorAPI functionality)
+		FetchApiImpl coordinator = new FetchApiImpl();
 
-		// 3. Process the file - ALL LOGIC IS INSIDE CoordinatorApiImpl!
+		// 3. Create the ComputingApi and DataStoreApi instances
+		ComputingApi computingApi = new ComputingApiImpl();
+		DataStoreApi dataStoreApi = new DataStoreApiImpl();
+
+		// 4. Set the dependencies on FetchApiImpl
+		coordinator.setComputingApi(computingApi);
+		coordinator.setDataStoreApi(dataStoreApi);
+
+		System.out.println("✓ Created FetchApiImpl with all dependencies set");
+		System.out.println("✓ FetchApiImpl now coordinates between ComputingApi and DataStoreApi");
+
+		// 5. Process the file - ALL LOGIC IS NOW INSIDE FetchApiImpl!
 		System.out.println("\n=== Processing File ===");
 		boolean success = coordinator.processFile(INPUT, OUTPUT);
 
-		// 4. Report results
+		// 6. Report results
 		if (success) {
 			System.out.println("\n✓ Successfully processed input file!");
 			System.out.println("Input: " + INPUT);

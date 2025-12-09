@@ -26,7 +26,7 @@ public class TestFetchApi {
 	// Helper method to create a properly configured FetchApi
 	private FetchApiImpl createConfiguredFetchApi() {
 		ComputingApi computingApi = new ComputingApiImpl();
-		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+		DataStoreApi dataStoreApi = new DataStoreApiImpl();
 		FetchApiImpl fetchApi = new FetchApiImpl();
 		fetchApi.setDataStoreApi(dataStoreApi);
 		fetchApi.setComputingApi(computingApi);
@@ -150,6 +150,7 @@ public class TestFetchApi {
 		assertEquals(1, result10.size());
 		assertEquals(3, result10.get(0)); // "ten" has 3 letters
 	}
+
 
 	@Test
 	public void testFetchApiWithoutDependencies() {
