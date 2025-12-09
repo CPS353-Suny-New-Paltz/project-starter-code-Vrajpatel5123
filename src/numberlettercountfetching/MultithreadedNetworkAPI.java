@@ -20,7 +20,7 @@ public class MultithreadedNetworkAPI implements FetchApi {
 	private FetchApi createDelegate() {
 		// Create the single-threaded implementation
 		numberlettercountcomputing.ComputingApi computingApi = new numberlettercountcomputing.ComputingApiImpl();
-		numberlettercountdatastoring.DataStoreApi dataStoreApi = new numberlettercountdatastoring.DataStoreApiImpl(computingApi);
+		numberlettercountdatastoring.DataStoreApi dataStoreApi = new numberlettercountdatastoring.DataStoreApiImpl();
 		FetchApiImpl fetchApi = new FetchApiImpl();
 		fetchApi.setDataStoreApi(dataStoreApi);
 		fetchApi.setComputingApi(computingApi);
