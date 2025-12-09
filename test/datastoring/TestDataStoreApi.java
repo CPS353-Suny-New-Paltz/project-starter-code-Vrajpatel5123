@@ -7,10 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
-import numberlettercountcomputing.ComputingApi;
-import numberlettercountcomputing.PassData;
+
 import numberlettercountdatastoring.DataRequest;
 import numberlettercountdatastoring.DataStoreApi;
 import numberlettercountdatastoring.DataStoreApiImpl;
@@ -19,16 +17,34 @@ public class TestDataStoreApi {
 
 	@Test
 	public void testInsertRequest() {
-		ComputingApi mockComputingApi = Mockito.mock(ComputingApi.class);
-		Mockito.when(mockComputingApi.passData(Mockito.anyInt())).thenReturn(new PassData());
-		Mockito.when(mockComputingApi.processPassData(Mockito.any(PassData.class))).thenReturn(List.of(1));
+		DataStoreApi dataStoreApi = new DataStoreApiImpl();
 
-		DataStoreApi dataStoreApi = new DataStoreApiImpl(mockComputingApi);
-
-		DataRequest request = new DataRequest(123, "test_source", "1,2");
+		DataRequest request = new DataRequest(123, "test_source", "1,2,3");
 		int result = dataStoreApi.insertRequest(request);
 
-		assertEquals(0, result);
+		// Should return count of stored numbers (3)
+		assertEquals(3, result);
+	}
+
+	@Test
+	public void testInsertRequestWithSingleNumber() {
+		DataStoreApi dataStoreApi = new DataStoreApiImpl();
+
+		DataRequest request = new DataRequest(123, "test_source", "42");
+		int result = dataStoreApi.insertRequest(request);
+
+		assertEquals(1, result);
+	}
+
+	@Test
+	public void testInsertRequestWithNegativeNumbers() {
+		DataStoreApi dataStoreApi = new DataStoreApiImpl();
+
+		DataRequest request = new DataRequest(123, "test_source", "1,-2,3");
+		int result = dataStoreApi.insertRequest(request);
+
+		// Should only store positive numbers (1 and 3)
+		assertEquals(2, result);
 	}
 
 	@Test
@@ -39,11 +55,27 @@ public class TestDataStoreApi {
 	}
 
 	@Test
-	public void testInsertRequestWithInvalidData() {
+	public void testInsertRequestWithEmptyData() {
 		DataStoreApi dataStoreApi = new DataStoreApiImpl();
-		DataRequest request = new DataRequest(123, "test_source", "invalid,data");
+		DataRequest request = new DataRequest(123, "test_source", "");
 		int result = dataStoreApi.insertRequest(request);
 		assertEquals(-1, result);
+	}
+
+	@Test
+	public void testInsertRequestWithInvalidDataFormat() {
+		DataStoreApi dataStoreApi = new DataStoreApiImpl();
+		DataRequest request = new DataRequest(123, "test_source", "invalid,data,here");
+		int result = dataStoreApi.insertRequest(request);
+		assertEquals(-1, result); // No valid numbers to store
+	}
+
+	@Test
+	public void testInsertRequestWithMixedValidInvalidData() {
+		DataStoreApi dataStoreApi = new DataStoreApiImpl();
+		DataRequest request = new DataRequest(123, "test_source", "10,invalid,20,notnumber,30");
+		int result = dataStoreApi.insertRequest(request);
+		assertEquals(3, result); // Should store 10, 20, 30
 	}
 
 	@Test
@@ -55,31 +87,51 @@ public class TestDataStoreApi {
 	}
 
 	@Test
-	public void testValidateNumberWithComputingApi() {
-		ComputingApi mockComputingApi = Mockito.mock(ComputingApi.class);
-		Mockito.when(mockComputingApi.passData(Mockito.anyInt())).thenReturn(new PassData());
-		Mockito.when(mockComputingApi.processPassData(Mockito.any(PassData.class))).thenReturn(List.of(1));
-
-		DataStoreApi dataStoreApi = new DataStoreApiImpl(mockComputingApi);
-		assertTrue(dataStoreApi.validateNumber(10));
+	public void testValidateNumberLargeNumber() {
+		DataStoreApi dataStoreApi = new DataStoreApiImpl();
+		assertTrue(dataStoreApi.validateNumber(1000000));
+		assertTrue(dataStoreApi.validateNumber(Integer.MAX_VALUE));
 	}
 
 	@Test
 	public void testFetchAllData() {
-		DataStoreApi dataStoreApi = new DataStoreApiImpl();
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
 		DataRequest request = new DataRequest(1, "source", "10,20");
 		dataStoreApi.insertRequest(request);
 
-		List<Integer> result = ((DataStoreApiImpl) dataStoreApi).fetchAllData();
+		List<Integer> result = dataStoreApi.getStoredNumbers();
 		assertEquals(2, result.size());
 		assertTrue(result.contains(10));
 		assertTrue(result.contains(20));
 	}
 
 	@Test
+	public void testFetchAllDataMultipleRequests() {
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
+
+		dataStoreApi.insertRequest(new DataRequest(1, "source1", "1,2,3"));
+		dataStoreApi.insertRequest(new DataRequest(2, "source2", "4,5"));
+		dataStoreApi.insertRequest(new DataRequest(3, "source3", "6"));
+
+		List<Integer> result = dataStoreApi.getStoredNumbers();
+		assertEquals(6, result.size());
+		assertTrue(result.containsAll(List.of(1, 2, 3, 4, 5, 6)));
+	}
+
+	@Test
 	public void testGetStoredDataCount() {
 		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
+		dataStoreApi.insertRequest(new DataRequest(1, "source", "1,2,3,4,5"));
+		assertEquals(5, dataStoreApi.getStoredNumbers().size());
+	}
+
+	@Test
+	public void testClearStorage() {
+		DataStoreApiImpl dataStoreApi = new DataStoreApiImpl();
 		dataStoreApi.insertRequest(new DataRequest(1, "source", "1,2,3"));
-		assertEquals(3, dataStoreApi.getStoredDataCount());
+		assertEquals(3, dataStoreApi.getStoredNumbers().size());
+
+		DataStoreApiImpl freshInstance = new DataStoreApiImpl();
+		assertTrue(freshInstance.getStoredNumbers().isEmpty());
 	}
 }
