@@ -27,7 +27,9 @@ public class StoreFetch {
 	}
 
 	public BigInteger getMax() {
-		if (storedValues.isEmpty()) return BigInteger.ZERO;
+		if (storedValues.isEmpty()) {
+			return BigInteger.ZERO;
+		}
 		BigInteger max = storedValues.get(0);
 		for (BigInteger value : storedValues) {
 			if (value.compareTo(max) > 0) {
@@ -38,7 +40,9 @@ public class StoreFetch {
 	}
 
 	public BigInteger getMin() {
-		if (storedValues.isEmpty()) return BigInteger.ZERO;
+		if (storedValues.isEmpty()) {
+			return BigInteger.ZERO;
+		}
 		BigInteger min = storedValues.get(0);
 		for (BigInteger value : storedValues) {
 			if (value.compareTo(min) < 0) {
