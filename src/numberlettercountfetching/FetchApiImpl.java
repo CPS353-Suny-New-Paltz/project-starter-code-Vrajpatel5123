@@ -1,3 +1,4 @@
+
 package numberlettercountfetching;
 
 import java.util.ArrayList;
@@ -167,33 +168,65 @@ public class FetchApiImpl implements FetchApi {
 				return List.of(-1);
 			}
 
-			// Validate and store each number
-			int validCount = 0;
+			List<Integer> letterCounts = new ArrayList<>(); // Store letter counts
+
+			// Process each number
 			for (Integer number : data) {
 				if (number == null) {
 					logger.warning("Skipping null number in request");
+					letterCounts.add(-1);
 					continue;
 				}
 
 				// Use internal validation
 				if (!validateNumber(number)) {
 					logger.warning("Skipping invalid number: " + number);
+					letterCounts.add(-1);
 					continue;
 				}
 
 				// Store the valid number
 				storedData.add(number);
-				validCount++;
 				logger.info("Stored number: " + number);
+
+				// Get letter count from ComputingApi
+				int letterCount = -1;
+				if (computingApi != null) {
+					try {
+						PassData passData = computingApi.passData(number);
+						List<Integer> results = computingApi.processPassData(passData);
+						if (results != null && !results.isEmpty()) {
+							letterCount = results.get(0); // First result is letter count
+							logger.info("Letter count for " + number + " = " + letterCount);
+						}
+					} catch (Exception e) {
+						logger.warning("ComputingApi failed for " + number + ": " + e.getMessage());
+					}
+				} else {
+					logger.warning("No ComputingApi available for " + number);
+				}
+
+				letterCounts.add(letterCount);
 			}
 
-			if (validCount == 0) {
-				logger.warning("No valid numbers found in request");
+			// Check if all failed
+			boolean allFailed = true;
+			for (Integer count : letterCounts) {
+				if (count != -1) {
+					allFailed = false;
+					break;
+				}
+			}
+
+			if (allFailed) {
+				logger.warning("All letter counts are -1");
 				return List.of(-1);
 			}
 
-			logger.info("Successfully stored " + validCount + " numbers");
-			return new ArrayList<>(data); // Return defensive copy
+			logger.info("Successfully processed " + letterCounts.size() + " numbers");
+			logger.info("Original: " + data);
+			logger.info("Letter counts: " + letterCounts);
+			return letterCounts; // Return letter counts, not original numbers!
 
 		} catch (Exception e) {
 			logger.severe("Error in insertRequest: " + e.getMessage());

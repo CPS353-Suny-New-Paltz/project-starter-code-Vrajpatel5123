@@ -136,20 +136,21 @@ public class TestFetchApi {
 		FetchRequest request1 = new IntFetchRequest(1);
 		List<Integer> result1 = fetchApi.insertRequest(request1);
 		assertEquals(1, result1.size());
-		assertEquals(1, result1.get(0)); // "one" has 3 letters
+		assertEquals(3, result1.get(0)); // "one" has 3 letters
 
 		// 5 = "five" = 4 letters
 		FetchRequest request5 = new IntFetchRequest(5);
 		List<Integer> result5 = fetchApi.insertRequest(request5);
 		assertEquals(1, result5.size());
-		assertEquals(5, result5.get(0)); // "five" has 4 letters (when it was using computingApi) not its just stored numbers
+		assertEquals(4, result5.get(0)); // "five" has 4 letters
 
 		// 10 = "ten" = 3 letters
 		FetchRequest request10 = new IntFetchRequest(10);
 		List<Integer> result10 = fetchApi.insertRequest(request10);
 		assertEquals(1, result10.size());
-		assertEquals(10, result10.get(0)); // "ten" has 3 letters
+		assertEquals(3, result10.get(0)); // "ten" has 3 letters
 	}
+
 
 	@Test
 	public void testFetchApiWithoutDependencies() {
@@ -159,7 +160,7 @@ public class TestFetchApi {
 		FetchRequest request = new IntFetchRequest(5);
 		List<Integer> result = fetchApi.insertRequest(request);
 
-
-		assertEquals(List.of(5), result);
+		// Should return -1 because no ComputingApi to get letter counts
+		assertEquals(List.of(-1), result);
 	}
 }
