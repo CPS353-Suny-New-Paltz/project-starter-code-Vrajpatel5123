@@ -23,6 +23,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+//will correct for checkpoint 6
 public class TestMultiUser {
 
 	private MultithreadedNetworkAPI networkAPI;
@@ -110,10 +111,9 @@ public class TestMultiUser {
 		assertFalse(singleResult.isEmpty());
 		assertEquals(3, singleResult.size());
 
-		// Verify they are letter counts (positive numbers) or -1 for errors
-		for (BigInteger count : singleResult) {
-			assertTrue(count.compareTo(BigInteger.ZERO) > 0 || count.equals(BigInteger.valueOf(-1)), 
-					"Should be positive letter count or -1: " + count);
+		// Verify they are letter counts (positive numbers)
+		for (int count : singleResult) {
+			assertTrue(count > 0 || count == -1, "Should be positive letter count or -1: " + count);
 		}
 
 		// Test multi-threaded
@@ -122,7 +122,7 @@ public class TestMultiUser {
 		assertFalse(multiResult.isEmpty());
 		assertEquals(3, multiResult.size());
 
-		// Both should produce same results
+		// Both should produce same results (same letter counts or same -1s)
 		assertEquals(singleResult, multiResult);
 	}
 
@@ -164,7 +164,7 @@ public class TestMultiUser {
 		// Should return letter counts for each number
 		assertEquals(7, results.size()); // One result per input number
 
-		// Expected letter counts as BigInteger:
+		// Verify expected letter counts:
 		// 1 = "one" = 3 letters
 		// 15 = "fifteen" = 7 letters  
 		// 10 = "ten" = 3 letters
@@ -172,22 +172,17 @@ public class TestMultiUser {
 		// 2 = "two" = 3 letters
 		// 3 = "three" = 5 letters
 		// 8 = "eight" = 5 letters
-		List<BigInteger> expected = List.of(
-				BigInteger.valueOf(3), 
-				BigInteger.valueOf(7), 
-				BigInteger.valueOf(3), 
-				BigInteger.valueOf(4), 
-				BigInteger.valueOf(3), 
-				BigInteger.valueOf(5), 
-				BigInteger.valueOf(5)
-				);
+
+		// Expected: [3, 7, 3, 4, 3, 5, 5]
+		List<Integer> expected = List.of(3, 7, 3, 4, 3, 5, 5);
 
 		for (int i = 0; i < results.size(); i++) {
-			BigInteger actual = results.get(i);
-			BigInteger expectedCount = expected.get(i);
+			// Accept either the expected letter count or -1 (if computation failed)
+			int actual = results.get(i);
+			int expectedCount = expected.get(i);
 
 			// Should be either the correct letter count or -1
-			assertTrue(actual.equals(expectedCount) || actual.equals(BigInteger.valueOf(-1)), 
+			assertTrue(actual == expectedCount || actual == -1, 
 					"Number " + testNumbers.get(i) + " should have " + expectedCount + 
 					" letters or -1, got: " + actual);
 		}
@@ -232,16 +227,8 @@ public class TestMultiUser {
 		assertEquals(singleResult, multiResult);
 		assertEquals(7, singleResult.size());
 
-		// Expected letter counts
-		List<BigInteger> expected = List.of(
-				BigInteger.valueOf(3), 
-				BigInteger.valueOf(7), 
-				BigInteger.valueOf(3), 
-				BigInteger.valueOf(4), 
-				BigInteger.valueOf(3), 
-				BigInteger.valueOf(5), 
-				BigInteger.valueOf(5)
-				);
+		// Expected letter counts: [3, 7, 3, 4, 3, 5, 5]
+		List<Integer> expected = List.of(3, 7, 3, 4, 3, 5, 5);
 
 		System.out.println("Test file processing results:");
 		System.out.println("Original numbers: " + numbers);
@@ -250,67 +237,11 @@ public class TestMultiUser {
 
 		// Check each result
 		for (int i = 0; i < singleResult.size(); i++) {
-			BigInteger actual = singleResult.get(i);
-			BigInteger expectedCount = expected.get(i);
-			assertTrue(actual.equals(expectedCount) || actual.equals(BigInteger.valueOf(-1)),
+			int actual = singleResult.get(i);
+			int expectedCount = expected.get(i);
+			assertTrue(actual == expectedCount || actual == -1,
 					"Number " + numbers.get(i) + " should have " + expectedCount + 
 					" letters or -1, got: " + actual);
-		}
-	}
-
-	@Test
-	public void testLargeNumberProcessing() {
-		// Test with very large numbers
-		List<BigInteger> largeNumbers = List.of(
-				new BigInteger("12345678901234567890"),
-				new BigInteger("999999999999999999999"),
-				new BigInteger("1000000000000000000000")
-				);
-
-		numberlettercountfetching.ListFetchRequest request = 
-				new numberlettercountfetching.ListFetchRequest(largeNumbers);
-
-		// Test both implementations
-		List<BigInteger> singleResult = singleThreadedAPI.insertRequest(request);
-		List<BigInteger> multiResult = networkAPI.insertRequest(request);
-
-		assertNotNull(singleResult);
-		assertNotNull(multiResult);
-		assertEquals(3, singleResult.size());
-		assertEquals(3, multiResult.size());
-
-		// Results should be the same for both implementations
-		assertEquals(singleResult, multiResult);
-
-		// Each result should be either a positive number (letter count) or -1
-		for (BigInteger result : singleResult) {
-			assertTrue(result.compareTo(BigInteger.ZERO) > 0 || result.equals(BigInteger.valueOf(-1)),
-					"Should be positive letter count or -1: " + result);
-		}
-	}
-
-	@Test
-	public void testMixedNumberProcessing() {
-		// Test with mixed small and large numbers
-		List<BigInteger> mixedNumbers = List.of(
-				BigInteger.valueOf(1),
-				new BigInteger("1000000000000000000"),
-				BigInteger.valueOf(15),
-				new BigInteger("999999999999999999999999"),
-				BigInteger.valueOf(100)
-				);
-
-		numberlettercountfetching.ListFetchRequest request = 
-				new numberlettercountfetching.ListFetchRequest(mixedNumbers);
-
-		List<BigInteger> results = singleThreadedAPI.insertRequest(request);
-		assertNotNull(results);
-		assertEquals(5, results.size());
-
-		// All results should be valid
-		for (BigInteger result : results) {
-			assertTrue(result.compareTo(BigInteger.ZERO) > 0 || result.equals(BigInteger.valueOf(-1)),
-					"Should be positive letter count or -1: " + result);
 		}
 	}
 

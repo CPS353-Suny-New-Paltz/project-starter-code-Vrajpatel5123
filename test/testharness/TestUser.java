@@ -9,6 +9,8 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 
+//will correct for checkpoint 6
+
 public class TestUser {
 
 	private final numberlettercountfetching.FetchApi coordinator;

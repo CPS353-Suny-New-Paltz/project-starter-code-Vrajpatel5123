@@ -145,6 +145,7 @@ public class TestFetchApi {
 		assertEquals(BigInteger.valueOf(3), result10.get(0)); // "ten" has 3 letters
 	}
 
+
 	@Test
 	public void testFetchApiWithoutDependencies() {
 		FetchApiImpl fetchApi = new FetchApiImpl(); // No dependencies set

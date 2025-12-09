@@ -1,3 +1,4 @@
+
 package numberlettercountfetching;
 
 import java.math.BigInteger;
@@ -18,10 +19,12 @@ public class FetchApiImpl implements FetchApi {
 	private static final Logger logger = Logger.getLogger(FetchApiImpl.class.getName());
 	private DataStoreApi dataStoreApi;
 	private ComputingApi computingApi;
-	private List<BigInteger> storedData = new ArrayList<>();
-	private List<BigInteger> lastResults = new ArrayList<>();
+	private List<Integer> storedData = new ArrayList<>();
+	private List<Integer> lastResults = new ArrayList<>();
 
+	// This constructor matches the CoordinatorApiImpl constructor
 	public FetchApiImpl() {
+		// These will be set later via setter methods
 		logger.info("FetchApiImpl created - dependencies need to be set");
 	}
 
@@ -35,8 +38,119 @@ public class FetchApiImpl implements FetchApi {
 		logger.info("ComputingApi dependency set");
 	}
 
-	// Process file method - returns letter counts as BigInteger
+	// CoordinatorAPI methods
 	public boolean processFile(String inputFile, String outputFile) {
+		try {
+			// 1. Read numbers from input file
+			Path inputPath = Paths.get(inputFile);
+			List<Integer> numbers = new ArrayList<>();
+
+			if (!Files.exists(inputPath)) {
+				System.err.println("Input file not found: " + inputFile);
+				logger.severe("Input file not found: " + inputFile);
+				return false;
+			}
+
+			for (String line : Files.readAllLines(inputPath)) {
+				try {
+					numbers.add(Integer.parseInt(line.trim()));
+				} catch (NumberFormatException e) {
+					System.err.println("Skipping invalid line: " + line);
+					logger.warning("Skipping invalid line: " + line);
+				}
+			}
+
+			if (numbers.isEmpty()) {
+				System.err.println("No valid numbers in input file");
+				logger.warning("No valid numbers in input file");
+				return false;
+			}
+
+			System.out.println("Processing " + numbers.size() + " numbers: " + numbers);
+			logger.info("Processing " + numbers.size() + " numbers from file: " + inputFile);
+
+			// 2. Process each number through ComputingApi
+			List<Integer> letterCounts = new ArrayList<>();
+			if (computingApi == null) {
+				System.err.println("ComputingApi not available");
+				logger.severe("ComputingApi not available");
+				return false;
+			}
+
+			for (Integer number : numbers) {
+				PassData passData = computingApi.passData(number);
+				List<Integer> results = computingApi.processPassData(passData);
+				if (!results.isEmpty()) {
+					letterCounts.add(results.get(0)); // Letter count
+					logger.info("Processed number " + number + " -> result: " + results.get(0));
+				}
+			}
+
+			this.lastResults = letterCounts;
+
+			// 3. Store the numbers via FetchApi's insertRequest
+			FetchRequest fetchRequest = new FetchRequest(numbers);
+			List<Integer> insertResult = this.insertRequest(fetchRequest);
+			if (insertResult != null && (insertResult.size() == 1 && insertResult.get(0) == -1)) {
+				logger.warning("Failed to store numbers via insertRequest");
+			} else {
+				logger.info("Successfully stored numbers via insertRequest");
+			}
+
+			// 4. Store computed results via DataStoreApi
+			if (dataStoreApi != null && !letterCounts.isEmpty()) {
+				int storedCount = 0;
+				for (Integer result : letterCounts) {
+					if (result != null) {
+						DataRequest dataRequest = new DataRequest(result);
+						int dataStoreResult = dataStoreApi.insertRequest(dataRequest);
+						if (dataStoreResult >= 0) {
+							storedCount++;
+						}
+					}
+				}
+				logger.info("Stored " + storedCount + " computed results via DataStoreApi");
+			}
+
+			// 5. Write results to output file
+			StringBuilder output = new StringBuilder();
+			for (int i = 0; i < letterCounts.size(); i++) {
+				output.append(letterCounts.get(i));
+				if (i < letterCounts.size() - 1) {
+					output.append(",");
+				}
+			}
+
+			Path outputPath = Paths.get(outputFile);
+			Files.write(outputPath, output.toString().getBytes(),
+					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+			System.out.println("Successfully wrote " + letterCounts.size() + 
+					" results to: " + outputFile);
+			System.out.println("Output: " + output.toString());
+
+			logger.info("Successfully wrote " + letterCounts.size() + 
+					" results to: " + outputFile);
+
+			return true;
+
+		} catch (IOException e) {
+			System.err.println("Error processing file: " + e.getMessage());
+			logger.severe("Error processing file: " + e.getMessage());
+			return false;
+		} catch (Exception e) {
+			System.err.println("Unexpected error: " + e.getMessage());
+			logger.severe("Unexpected error in processFile: " + e.getMessage());
+			return false;
+		}
+	}
+
+	public List<Integer> getLastResults() {
+		return new ArrayList<>(lastResults); // Return defensive copy
+	}
+
+	// Original FetchApi methods
+	public List<Integer> insertRequest(FetchRequest fetchRequest) {
 		try {
 			Path inputPath = Paths.get(inputFile);
 			List<BigInteger> numbers = new ArrayList<>();
@@ -167,13 +281,13 @@ public class FetchApiImpl implements FetchApi {
 			for (BigInteger number : data) {
 				if (number == null) {
 					logger.warning("Skipping null number in request");
-					letterCounts.add(BigInteger.valueOf(-1));
+					letterCounts.add(-1);
 					continue;
 				}
 
 				if (!validateNumber(number)) {
 					logger.warning("Skipping invalid number: " + number);
-					letterCounts.add(BigInteger.valueOf(-1));
+					letterCounts.add(-1);
 					continue;
 				}
 
@@ -183,32 +297,26 @@ public class FetchApiImpl implements FetchApi {
 				BigInteger letterCount = BigInteger.valueOf(-1);
 				if (computingApi != null) {
 					try {
-						if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
-								number.compareTo(BigInteger.valueOf(0)) >= 0) {
-
-							int intNumber = number.intValue();
-							PassData passData = computingApi.passData(intNumber);
-							List<Integer> results = computingApi.processPassData(passData);
-
-							if (!results.isEmpty()) {
-								letterCount = BigInteger.valueOf(results.get(0));
-								logger.info("Letter count for " + number + " = " + letterCount);
-							}
-						} else {
-							letterCount = convertLargeNumberToLetterCount(number);
-							logger.info("Large number letter count for " + number + " = " + letterCount);
+						PassData passData = computingApi.passData(number);
+						List<Integer> results = computingApi.processPassData(passData);
+						if (results != null && !results.isEmpty()) {
+							letterCount = results.get(0); // First result is letter count
+							logger.info("Letter count for " + number + " = " + letterCount);
 						}
 					} catch (Exception e) {
 						logger.warning("ComputingApi failed for " + number + ": " + e.getMessage());
 					}
+				} else {
+					logger.warning("No ComputingApi available for " + number);
 				}
 
 				letterCounts.add(letterCount);
 			}
 
+			// Check if all failed
 			boolean allFailed = true;
-			for (BigInteger count : letterCounts) {
-				if (count != null && !count.equals(BigInteger.valueOf(-1))) {
+			for (Integer count : letterCounts) {
+				if (count != -1) {
 					allFailed = false;
 					break;
 				}
@@ -216,11 +324,13 @@ public class FetchApiImpl implements FetchApi {
 
 			if (allFailed) {
 				logger.warning("All letter counts are -1");
-				return List.of(BigInteger.valueOf(-1));
+				return List.of(-1);
 			}
 
 			logger.info("Successfully processed " + letterCounts.size() + " numbers");
-			return letterCounts;
+			logger.info("Original: " + data);
+			logger.info("Letter counts: " + letterCounts);
+			return letterCounts; // Return letter counts, not original numbers!
 
 		} catch (Exception e) {
 			logger.severe("Error in insertRequest: " + e.getMessage());
@@ -339,14 +449,9 @@ public class FetchApiImpl implements FetchApi {
 		try {
 			for (BigInteger result : computedResults) {
 				if (result != null) {
-					// Create DataRequest - use result as request ID if it fits in int
-					DataRequest dataRequest;
-					if (result.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
-							result.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) >= 0) {
-						dataRequest = new DataRequest(result.intValue());
-					} else {
-						dataRequest = new DataRequest(0); // Use default ID for large results
-					}
+					// Create DataRequest for each result
+					DataRequest dataRequest = new DataRequest(result);
+					int insertResult = dataStoreApi.insertRequest(dataRequest);
 
 					int insertResult = dataStoreApi.insertRequest(dataRequest);
 					if (insertResult >= 0) {
