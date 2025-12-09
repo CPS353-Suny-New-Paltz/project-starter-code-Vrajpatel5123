@@ -42,11 +42,14 @@ public class TestFetchApi {
 		List<BigInteger> result = fetchApi.insertRequest(intRequest);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		// Should return letter count for 123, not 123
 		// 123 = "one hundred twenty-three" = letters count
 		assertEquals(1, result.size()); // One result
 		assertTrue(result.get(0) > 0, "Should return positive letter count");
 =======
+=======
+>>>>>>> Stashed changes
 		assertEquals(List.of(BigInteger.valueOf(123)), result);
 	}
 
@@ -60,6 +63,9 @@ public class TestFetchApi {
 
 		assertEquals(List.of(largeNumber), result);
 		assertEquals(largeNumber.toString(), "123456789012345678901234567890");
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 	}
 
@@ -75,6 +81,7 @@ public class TestFetchApi {
 		List<BigInteger> result = fetchApi.insertRequest(listRequest);
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		// Should return letter counts for [1, 2, 3], not [1, 2, 3]
 		// 1 = "one" = 3 letters, 2 = "two" = 3 letters, 3 = "three" = 5 letters
 		assertEquals(3, result.size());
@@ -83,11 +90,16 @@ public class TestFetchApi {
 			assertTrue(count > 0, "Should return positive letter count: " + count);
 		}
 =======
+=======
+>>>>>>> Stashed changes
 		assertEquals(List.of(
 				BigInteger.valueOf(1), 
 				BigInteger.valueOf(2), 
 				BigInteger.valueOf(3)
 				), result);
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 	}
 
@@ -115,14 +127,22 @@ public class TestFetchApi {
 		assertEquals(BigInteger.valueOf(97), result.get(0)); // 'a' ASCII
 		assertEquals(BigInteger.valueOf(98), result.get(1)); // 'b' ASCII  
 		assertEquals(BigInteger.valueOf(99), result.get(2)); // 'c' ASCII
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 	}
 
 	@Test
 	public void testInsertRequestWithNull() {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
 		List<Integer> result = fetchApi.insertRequest(null);
+=======
+		FetchApi fetchApi = new FetchApiImpl();
+		List<BigInteger> result = fetchApi.insertRequest(null);
+>>>>>>> Stashed changes
 =======
 		FetchApi fetchApi = new FetchApiImpl();
 		List<BigInteger> result = fetchApi.insertRequest(null);
@@ -146,6 +166,20 @@ public class TestFetchApi {
 	public void testValidateLargeNumber() {
 		FetchApi fetchApi = new FetchApiImpl();
 
+<<<<<<< Updated upstream
+=======
+		assertTrue(fetchApi.validateNumber(BigInteger.ZERO));
+		assertTrue(fetchApi.validateNumber(BigInteger.valueOf(100)));
+		assertTrue(fetchApi.validateNumber(BigInteger.valueOf(999)));
+		assertFalse(fetchApi.validateNumber(BigInteger.valueOf(-1)));
+		assertFalse(fetchApi.validateNumber(BigInteger.valueOf(-100)));
+	}
+
+	@Test
+	public void testValidateLargeNumber() {
+		FetchApi fetchApi = new FetchApiImpl();
+
+>>>>>>> Stashed changes
 		// Test with very large numbers
 		BigInteger largeNumber = new BigInteger("99999999999999999999999999999999999999");
 		assertTrue(fetchApi.validateNumber(largeNumber), "Should validate large positive numbers");
@@ -174,7 +208,11 @@ public class TestFetchApi {
 
 		assertEquals(1, data.size());
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		assertEquals(42, data.get(0)); // getStoredData returns original numbers
+=======
+		assertEquals(BigInteger.valueOf(42), data.get(0));
+>>>>>>> Stashed changes
 =======
 		assertEquals(BigInteger.valueOf(42), data.get(0));
 >>>>>>> Stashed changes
@@ -195,6 +233,7 @@ public class TestFetchApi {
 	}
 
 	@Test
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 	public void testLetterCountsForSpecificNumbers() {
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
@@ -230,6 +269,8 @@ public class TestFetchApi {
 		// Should return -1 because no ComputingApi to get letter counts
 		assertEquals(List.of(-1), result);
 =======
+=======
+>>>>>>> Stashed changes
 	public void testGetTotalSum() {
 		FetchApiImpl fetchApi = new FetchApiImpl();
 
@@ -318,6 +359,9 @@ public class TestFetchApi {
 
 		assertEquals(0, request.size());
 		assertTrue(request.isEmpty());
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 	}
 }

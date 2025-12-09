@@ -84,7 +84,13 @@ public class ComputeEngineIntegrationTest {
 
 		// Step 2: Process data through computing API
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		PassData passData = computingApi.passData(7);
+=======
+		// Note: ComputingApi still uses int, so we need to convert
+		int intValue = fetchedData.get(0).intValue();
+		PassData passData = computingApi.passData(intValue);
+>>>>>>> Stashed changes
 =======
 		// Note: ComputingApi still uses int, so we need to convert
 		int intValue = fetchedData.get(0).intValue();
@@ -106,9 +112,13 @@ public class ComputeEngineIntegrationTest {
 
 		// Verify workflow success
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		// FetchApi should return letter count (not the number 7)
 		// 7 = "seven" = 5 letters
 		assertEquals(5, fetchedData.get(0), "Should return letter count for number 7");
+=======
+		assertEquals(List.of(BigInteger.valueOf(7)), fetchedData, "Should fetch number 7");
+>>>>>>> Stashed changes
 =======
 		assertEquals(List.of(BigInteger.valueOf(7)), fetchedData, "Should fetch number 7");
 >>>>>>> Stashed changes
@@ -193,10 +203,15 @@ public class ComputeEngineIntegrationTest {
 
 		assertFalse(fetchResult.isEmpty(), "Should return data");
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 		// Should return letter count, not the number 5
 		// 5 = "five" = 4 letters
 		assertEquals(4, fetchResult.get(0), "Should return letter count for number 5");
 		assertNotEquals(-1, fetchResult.get(0), "Should not return error code");
+=======
+		assertEquals(testNumber, fetchResult.get(0), "Should return number 5");
+		assertNotEquals(BigInteger.valueOf(-1), fetchResult.get(0), "Should not return error code");
+>>>>>>> Stashed changes
 =======
 		assertEquals(testNumber, fetchResult.get(0), "Should return number 5");
 		assertNotEquals(BigInteger.valueOf(-1), fetchResult.get(0), "Should not return error code");
@@ -218,6 +233,29 @@ public class ComputeEngineIntegrationTest {
 	public void testComponentCommunicationWithLargeNumbers() {
 		ComputingApi computingApi = new ComputingApiImpl();
 		DataStoreApi dataStoreApi = new DataStoreApiImpl(computingApi);
+<<<<<<< Updated upstream
+=======
+		FetchApi fetchApi = new FetchApiImpl();
+		((FetchApiImpl) fetchApi).setDataStoreApi(dataStoreApi);
+
+		// Test with large number that's within int range
+		BigInteger largeWithinRange = new BigInteger("1234567890"); // Within int range
+		FetchRequest request1 = new IntFetchRequest(largeWithinRange);
+		List<BigInteger> result1 = fetchApi.insertRequest(request1);
+
+		assertTrue(fetchApi.validateNumber(largeWithinRange), "Should validate number within int range");
+
+		// Test with large number beyond int range
+		BigInteger largeBeyondRange = new BigInteger("99999999999999999999"); // Beyond int range
+		boolean validationResult = fetchApi.validateNumber(largeBeyondRange);
+
+		// Validation might succeed or fail depending on implementation
+		System.out.println("Validation for number beyond int range: " + validationResult);
+	}
+
+	@Test
+	public void testFetchApiErrorHandling() {
+>>>>>>> Stashed changes
 		FetchApi fetchApi = new FetchApiImpl();
 		((FetchApiImpl) fetchApi).setDataStoreApi(dataStoreApi);
 
@@ -341,6 +379,7 @@ public class ComputeEngineIntegrationTest {
 
 		BigInteger sum = fetchApi.getTotalSum();
 		assertEquals(BigInteger.valueOf(55), sum);
+<<<<<<< Updated upstream
 	}
 
 	@Test
@@ -393,6 +432,11 @@ public class ComputeEngineIntegrationTest {
 		System.out.println("Letter counts: " + results);
 	}
 =======
+=======
+	}
+
+	@Test
+>>>>>>> Stashed changes
 	public void testLargeNumberOperations() {
 		FetchApiImpl fetchApi = new FetchApiImpl();
 
@@ -438,5 +482,8 @@ public class ComputeEngineIntegrationTest {
         }
     }
 	 */
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }

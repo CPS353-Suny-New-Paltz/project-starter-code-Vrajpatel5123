@@ -12,7 +12,10 @@ import numberlettercountcomputing.PassData;
 public class FetchApiImpl implements FetchApi {
 	private static final Logger logger = Logger.getLogger(FetchApiImpl.class.getName());
 	private DataStoreApi dataStoreApi;
+<<<<<<< Updated upstream
 	private ComputingApi computingApi;
+=======
+>>>>>>> Stashed changes
 	private List<BigInteger> storedData = new ArrayList<>();
 
 	public void setDataStoreApi(DataStoreApi dataStoreApi) {
@@ -20,11 +23,14 @@ public class FetchApiImpl implements FetchApi {
 		logger.info("DataStoreApi dependency set");
 	}
 
+<<<<<<< Updated upstream
 	public void setComputingApi(ComputingApi computingApi) {
 		this.computingApi = computingApi;
 		logger.info("ComputingApi dependency set");
 	}
 
+=======
+>>>>>>> Stashed changes
 	public List<BigInteger> insertRequest(FetchRequest fetchRequest) {
 		try {
 			// Parameter validation
@@ -44,9 +50,14 @@ public class FetchApiImpl implements FetchApi {
 				return List.of(BigInteger.valueOf(-1));
 			}
 
+<<<<<<< Updated upstream
 			List<BigInteger> letterCounts = new ArrayList<>(); // Store letter counts as BigInteger
 
 			// Process each number
+=======
+			// Validate and store each number
+			int validCount = 0;
+>>>>>>> Stashed changes
 			for (BigInteger number : data) {
 				if (number == null) {
 					logger.warning("Skipping null number in request");
@@ -54,6 +65,7 @@ public class FetchApiImpl implements FetchApi {
 					continue;
 				}
 
+<<<<<<< Updated upstream
 				// Validate the number
 				if (!validateNumber(number)) {
 					logger.warning("Skipping invalid number: " + number);
@@ -62,6 +74,18 @@ public class FetchApiImpl implements FetchApi {
 				}
 
 				// Store the valid number
+=======
+				if (number.compareTo(BigInteger.ZERO) < 0) {
+					logger.warning("Skipping negative number: " + number);
+					continue;
+				}
+
+				// Check for memory constraints (optional, for very large lists)
+				if (storedData.size() > 1000000) { // Arbitrary limit
+					logger.warning("Storage capacity warning: " + storedData.size() + " items");
+				}
+
+>>>>>>> Stashed changes
 				storedData.add(number);
 				logger.info("Stored number: " + number);
 
@@ -69,6 +93,7 @@ public class FetchApiImpl implements FetchApi {
 				BigInteger letterCount = BigInteger.valueOf(-1);
 				if (computingApi != null) {
 					try {
+<<<<<<< Updated upstream
 						// Check if number fits in int for ComputingApi
 						if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
 								number.compareTo(BigInteger.valueOf(0)) >= 0) {
@@ -103,6 +128,18 @@ public class FetchApiImpl implements FetchApi {
 							int insertResult = dataStoreApi.insertRequest(dataRequest);
 							logger.info("DataStoreApi insert result: " + insertResult);
 						}
+=======
+						// Convert BigInteger to int if needed, but check bounds
+						boolean isValid = false;
+						if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
+								number.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) >= 0) {
+							isValid = dataStoreApi.validateNumber(number.intValue());
+						} else {
+							// For numbers beyond int range, use alternative validation
+							isValid = validateLargeNumber(number);
+						}
+						logger.info("Number " + number + " validation: " + isValid);
+>>>>>>> Stashed changes
 					} catch (Exception e) {
 						logger.warning("ComputingApi processing failed for number " + number + ": " + e.getMessage());
 					}
@@ -122,8 +159,13 @@ public class FetchApiImpl implements FetchApi {
 				}
 			}
 
+<<<<<<< Updated upstream
 			if (allErrors) {
 				logger.warning("No valid letter counts generated");
+=======
+			if (validCount == 0) {
+				logger.warning("No valid numbers found in request");
+>>>>>>> Stashed changes
 				return List.of(BigInteger.valueOf(-1));
 			}
 
@@ -132,6 +174,7 @@ public class FetchApiImpl implements FetchApi {
 
 		} catch (Exception e) {
 			logger.severe("Error in insertRequest: " + e.getMessage());
+<<<<<<< Updated upstream
 			return List.of(BigInteger.valueOf(-1));
 		}
 	}
@@ -161,12 +204,24 @@ public class FetchApiImpl implements FetchApi {
 
 	public boolean validateNumber(BigInteger number) {
 		try {
+=======
+			return List.of(BigInteger.valueOf(-1)); // Error indicator
+		}
+	}
+
+	public boolean validateNumber(BigInteger number) {
+		try {
+>>>>>>> Stashed changes
 			if (number == null) {
 				logger.warning("Number is null");
 				return false;
 			}
 
+<<<<<<< Updated upstream
 			// Basic validation - non-negative
+=======
+			// Basic validation
+>>>>>>> Stashed changes
 			boolean basicValidation = number.compareTo(BigInteger.ZERO) >= 0;
 			logger.info("Basic validation for number " + number + ": " + basicValidation);
 
