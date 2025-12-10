@@ -17,7 +17,7 @@ public class InMemoryDataStore implements DataStoreApi {
 		this.outputConfig = outputConfig;
 	}
 
-	
+
 	public int insertRequest(DataRequest dataRequest) {
 		if (inputConfig != null && outputConfig != null) {
 			outputConfig.clearOutput();
@@ -30,7 +30,7 @@ public class InMemoryDataStore implements DataStoreApi {
 		return -1;
 	}
 
-	
+
 	public List<Integer> fetchAllData() {
 		if (inputConfig != null) {
 			return new ArrayList<>(inputConfig.getInputNumbers());
@@ -38,12 +38,12 @@ public class InMemoryDataStore implements DataStoreApi {
 		return new ArrayList<>();
 	}
 
-	
+
 	public boolean processRequest() {
 		return inputConfig != null && outputConfig != null;
 	}
 
-	
+
 	public boolean validateNumber(int number) {
 		return number >= 0;
 	}
@@ -54,5 +54,73 @@ public class InMemoryDataStore implements DataStoreApi {
 			return numberWords[number];
 		}
 		return String.valueOf(number);
+	}
+
+
+	public boolean writeResultsToFile(String filePath, List<String> results) {
+		if (outputConfig == null || results == null) {
+			return false;
+		}
+
+		try {
+			// Clear existing output
+			outputConfig.clearOutput();
+
+			// Add all results to output configuration
+			for (String result : results) {
+				outputConfig.addOutputString(result);
+			}
+
+			System.out.println("InMemoryDataStore: Written " + results.size() + 
+					" results to output configuration (simulated file: " + filePath + ")");
+			return true;
+
+		} catch (Exception e) {
+			System.err.println("Error writing to in-memory store: " + e.getMessage());
+			return false;
+		}
+	}
+
+
+
+	public boolean processFile(String input, String output) {
+		if (inputConfig == null || outputConfig == null) {
+			System.err.println("InMemoryDataStore: Missing input or output configuration");
+			return false;
+		}
+
+		try {
+			System.out.println("InMemoryDataStore: Processing simulated file from " + input + " to " + output);
+
+			// Clear existing output
+			outputConfig.clearOutput();
+
+			// Get numbers from input configuration
+			List<Integer> numbers = inputConfig.getInputNumbers();
+
+			if (numbers.isEmpty()) {
+				System.err.println("InMemoryDataStore: No input numbers to process");
+				return false;
+			}
+
+			// Process each number: convert to word and add to output
+			for (Integer number : numbers) {
+				if (validateNumber(number)) {
+					String word = convertNumberToWord(number);
+					outputConfig.addOutputString(word);
+					System.out.println("InMemoryDataStore: Processed " + number + " -> \"" + word + "\"");
+				} else {
+					System.err.println("InMemoryDataStore: Skipping invalid number: " + number);
+					outputConfig.addOutputString("ERROR: Invalid number " + number);
+				}
+			}
+
+			System.out.println("InMemoryDataStore: Successfully processed " + numbers.size() + " numbers");
+			return true;
+
+		} catch (Exception e) {
+			System.err.println("InMemoryDataStore: Error processing file: " + e.getMessage());
+			return false;
+		}
 	}
 }

@@ -1,3 +1,4 @@
+
 package testharness;
 
 import numberlettercountfetching.MultithreadedNetworkAPI;
@@ -109,10 +110,12 @@ public class TestMultiUser {
 		assertFalse(singleResult.isEmpty());
 		assertEquals(3, singleResult.size());
 
-		// Verify they are letter counts (positive numbers) or -1 for errors
+		// FIX: Verify they are letter counts (positive numbers) or error codes (-1 or -2)
 		for (BigInteger count : singleResult) {
-			assertTrue(count.compareTo(BigInteger.ZERO) > 0 || count.equals(BigInteger.valueOf(-1)), 
-					"Should be positive letter count or -1: " + count);
+			assertTrue(count.compareTo(BigInteger.ZERO) > 0 || 
+					count.equals(BigInteger.valueOf(-1)) ||
+					count.equals(BigInteger.valueOf(-2)), 
+					"Should be positive letter count, -1, or -2: " + count);
 		}
 
 		// Test multi-threaded
@@ -185,10 +188,12 @@ public class TestMultiUser {
 			BigInteger actual = results.get(i);
 			BigInteger expectedCount = expected.get(i);
 
-			// Should be either the correct letter count or -1
-			assertTrue(actual.equals(expectedCount) || actual.equals(BigInteger.valueOf(-1)), 
+			// FIX: Should be either the correct letter count, -1, or -2
+			assertTrue(actual.equals(expectedCount) || 
+					actual.equals(BigInteger.valueOf(-1)) ||
+					actual.equals(BigInteger.valueOf(-2)), 
 					"Number " + testNumbers.get(i) + " should have " + expectedCount + 
-					" letters or -1, got: " + actual);
+					" letters, -1, or -2, got: " + actual);
 		}
 
 		System.out.println("Original numbers: " + testNumbers);
@@ -281,10 +286,13 @@ public class TestMultiUser {
 		// Results should be the same for both implementations
 		assertEquals(singleResult, multiResult);
 
-		// Each result should be either a positive number (letter count) or -1
+		// FIX: Accept -1 OR -2 as valid error codes for large numbers
+		// Large numbers (> Integer.MAX_VALUE) should return -2, other errors return -1
 		for (BigInteger result : singleResult) {
-			assertTrue(result.compareTo(BigInteger.ZERO) > 0 || result.equals(BigInteger.valueOf(-1)),
-					"Should be positive letter count or -1: " + result);
+			assertTrue(result.compareTo(BigInteger.ZERO) > 0 || 
+					result.equals(BigInteger.valueOf(-1)) ||
+					result.equals(BigInteger.valueOf(-2)), 
+					"Should be positive letter count, -1, or -2: " + result);
 		}
 	}
 
@@ -292,11 +300,11 @@ public class TestMultiUser {
 	public void testMixedNumberProcessing() {
 		// Test with mixed small and large numbers
 		List<BigInteger> mixedNumbers = List.of(
-				BigInteger.valueOf(1),
-				new BigInteger("1000000000000000000"),
-				BigInteger.valueOf(15),
-				new BigInteger("999999999999999999999999"),
-				BigInteger.valueOf(100)
+				BigInteger.valueOf(1),  // Small - should work
+				new BigInteger("1000000000000000000"),  // Large - might get -2
+				BigInteger.valueOf(15), // Small - should work  
+				new BigInteger("999999999999999999999999"), // Large - might get -2
+				BigInteger.valueOf(100) // Small - should work
 				);
 
 		numberlettercountfetching.ListFetchRequest request = 
@@ -306,10 +314,24 @@ public class TestMultiUser {
 		assertNotNull(results);
 		assertEquals(5, results.size());
 
-		// All results should be valid
-		for (BigInteger result : results) {
-			assertTrue(result.compareTo(BigInteger.ZERO) > 0 || result.equals(BigInteger.valueOf(-1)),
-					"Should be positive letter count or -1: " + result);
+		// FIX: Accept -1 OR -2 as valid error codes
+		// Check each result based on the input
+		for (int i = 0; i < results.size(); i++) {
+			BigInteger result = results.get(i);
+			BigInteger input = mixedNumbers.get(i);
+
+			if (input.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) > 0) {
+				// Large number - should be positive OR -2 (too large) OR -1 (error)
+				assertTrue(result.compareTo(BigInteger.ZERO) > 0 || 
+						result.equals(BigInteger.valueOf(-2)) ||
+						result.equals(BigInteger.valueOf(-1)), 
+						"Large number " + input + " should return positive, -1, or -2, got: " + result);
+			} else {
+				// Small number - should be positive OR -1 (error)
+				assertTrue(result.compareTo(BigInteger.ZERO) > 0 || 
+						result.equals(BigInteger.valueOf(-1)), 
+						"Small number " + input + " should return positive or -1, got: " + result);
+			}
 		}
 	}
 

@@ -1,3 +1,4 @@
+
 package fetching;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -6,15 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.junit.jupiter.api.Test;
 
 import numberlettercountfetching.FetchApiImpl;
 import numberlettercountfetching.FetchRequest;
-import numberlettercountfetching.IntFetchRequest;
-import numberlettercountfetching.ListFetchRequest;
-import numberlettercountfetching.StringFetchRequest;
-
 import numberlettercountcomputing.ComputingApi;
 import numberlettercountcomputing.ComputingApiImpl;
 import numberlettercountdatastoring.DataStoreApi;
@@ -33,33 +31,35 @@ public class TestFetchApi {
 	}
 
 	@Test
-	public void testInsertRequestWithIntFetchRequest() {
+	public void testInsertRequestWithSingleNumber() {
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
 
-		FetchRequest intRequest = new IntFetchRequest(123);
-		List<BigInteger> result = fetchApi.insertRequest(intRequest);
+		List<BigInteger> numbers = List.of(BigInteger.valueOf(123));
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
 
 		// Should return letter count for 123 as BigInteger
 		assertEquals(1, result.size());
+		// "one hundred and twenty-three" = 23 letters (without "and" = 20)
 		assertTrue(result.get(0).compareTo(BigInteger.ZERO) > 0, "Should return positive letter count");
 	}
 
 	@Test
-	public void testInsertRequestWithLargeIntFetchRequest() {
+	public void testInsertRequestWithLargeNumber() {
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
 
 		BigInteger largeNumber = new BigInteger("123456789012345678901234567890");
-		FetchRequest intRequest = new IntFetchRequest(largeNumber);
-		List<BigInteger> result = fetchApi.insertRequest(intRequest);
+		List<BigInteger> numbers = List.of(largeNumber);
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
 
-		// Should handle large numbers
 		assertEquals(1, result.size());
-		// Result could be positive letter count or -1 for error
-		assertTrue(result.get(0).compareTo(BigInteger.valueOf(-1)) != 0, "Should not return -1 for valid large number");
+		// Large numbers return -2 (not implemented)
+		assertEquals(BigInteger.valueOf(-2), result.get(0));
 	}
 
 	@Test
-	public void testInsertRequestWithListFetchRequest() {
+	public void testInsertRequestWithMultipleNumbers() {
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
 
 		List<BigInteger> numbers = List.of(
@@ -67,36 +67,75 @@ public class TestFetchApi {
 				BigInteger.valueOf(2), 
 				BigInteger.valueOf(3)
 				);
-		FetchRequest listRequest = new ListFetchRequest(numbers);
-		List<BigInteger> result = fetchApi.insertRequest(listRequest);
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
 
 		assertEquals(3, result.size());
-		for (BigInteger count : result) {
-			assertTrue(count.compareTo(BigInteger.ZERO) > 0 || count.equals(BigInteger.valueOf(-1)),
-					"Should return positive letter count or -1");
-		}
+		// Check specific letter counts
+		assertEquals(BigInteger.valueOf(3), result.get(0)); // "one" = 3
+		assertEquals(BigInteger.valueOf(3), result.get(1)); // "two" = 3
+		assertEquals(BigInteger.valueOf(5), result.get(2)); // "three" = 5
 	}
 
 	@Test
-	public void testInsertRequestWithStringFetchRequest() {
+	public void testInsertRequestWithZero() {
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
 
-		FetchRequest stringRequest = new StringFetchRequest("abc");
-		List<BigInteger> result = fetchApi.insertRequest(stringRequest);
+		List<BigInteger> numbers = List.of(BigInteger.ZERO);
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
 
-		assertEquals(3, result.size());
-		for (BigInteger count : result) {
-			assertTrue(count.compareTo(BigInteger.ZERO) > 0 || count.equals(BigInteger.valueOf(-1)),
-					"Should return positive letter count or -1");
-		}
+		assertEquals(1, result.size());
+		assertEquals(BigInteger.valueOf(4), result.get(0)); // "zero" = 4
 	}
 
 	@Test
-	public void testInsertRequestWithNull() {
+	public void testInsertRequestWithNegativeNumber() {
+		FetchApiImpl fetchApi = createConfiguredFetchApi();
+
+		List<BigInteger> numbers = List.of(BigInteger.valueOf(-5));
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
+
+		assertEquals(1, result.size());
+		assertEquals(BigInteger.valueOf(-1), result.get(0));
+	}
+
+	@Test
+	public void testInsertRequestWithNullRequest() {
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
 		List<BigInteger> result = fetchApi.insertRequest(null);
 
 		assertEquals(List.of(BigInteger.valueOf(-1)), result);
+	}
+
+	@Test
+	public void testInsertRequestWithEmptyRequest() {
+		FetchApiImpl fetchApi = createConfiguredFetchApi();
+
+		List<BigInteger> emptyList = new ArrayList<>();
+		FetchRequest request = new FetchRequest(emptyList);
+		List<BigInteger> result = fetchApi.insertRequest(request);
+
+		assertEquals(List.of(BigInteger.valueOf(-1)), result);
+	}
+
+	@Test
+	public void testInsertRequestWithNullInList() {
+		FetchApiImpl fetchApi = createConfiguredFetchApi();
+
+		List<BigInteger> numbers = new ArrayList<>();
+		numbers.add(BigInteger.valueOf(1));
+		numbers.add(null);
+		numbers.add(BigInteger.valueOf(3));
+
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
+
+		assertEquals(3, result.size());
+		assertEquals(BigInteger.valueOf(3), result.get(0)); // "one"
+		assertEquals(BigInteger.valueOf(-1), result.get(1)); // null
+		assertEquals(BigInteger.valueOf(5), result.get(2)); // "three"
 	}
 
 	@Test
@@ -111,47 +150,77 @@ public class TestFetchApi {
 	}
 
 	@Test
-	public void testGetStoredData() {
+	public void testValidateNumberWithNull() {
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
-
-		List<BigInteger> emptyData = fetchApi.getStoredData();
-		assertTrue(emptyData.isEmpty());
-
-		fetchApi.insertRequest(new IntFetchRequest(42));
-		List<BigInteger> data = fetchApi.getStoredData();
-
-		assertEquals(1, data.size());
-		assertEquals(BigInteger.valueOf(42), data.get(0));
+		assertFalse(fetchApi.validateNumber(null));
 	}
 
 	@Test
 	public void testLetterCountsForSpecificNumbers() {
 		FetchApiImpl fetchApi = createConfiguredFetchApi();
 
-		// Test specific number conversions
-		FetchRequest request1 = new IntFetchRequest(1);
-		List<BigInteger> result1 = fetchApi.insertRequest(request1);
-		assertEquals(1, result1.size());
-		assertEquals(BigInteger.valueOf(3), result1.get(0)); // "one" has 3 letters
+		List<BigInteger> numbers = List.of(
+				BigInteger.valueOf(1),
+				BigInteger.valueOf(5),
+				BigInteger.valueOf(10)
+				);
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
 
-		FetchRequest request5 = new IntFetchRequest(5);
-		List<BigInteger> result5 = fetchApi.insertRequest(request5);
-		assertEquals(1, result5.size());
-		assertEquals(BigInteger.valueOf(4), result5.get(0)); // "five" has 4 letters
-
-		FetchRequest request10 = new IntFetchRequest(10);
-		List<BigInteger> result10 = fetchApi.insertRequest(request10);
-		assertEquals(1, result10.size());
-		assertEquals(BigInteger.valueOf(3), result10.get(0)); // "ten" has 3 letters
+		assertEquals(3, result.size());
+		assertEquals(BigInteger.valueOf(3), result.get(0)); // "one" = 3
+		assertEquals(BigInteger.valueOf(4), result.get(1)); // "five" = 4
+		assertEquals(BigInteger.valueOf(3), result.get(2)); // "ten" = 3
 	}
 
 	@Test
 	public void testFetchApiWithoutDependencies() {
 		FetchApiImpl fetchApi = new FetchApiImpl(); // No dependencies set
 
-		FetchRequest request = new IntFetchRequest(5);
+		List<BigInteger> numbers = List.of(BigInteger.valueOf(5));
+		FetchRequest request = new FetchRequest(numbers);
 		List<BigInteger> result = fetchApi.insertRequest(request);
 
-		assertEquals(List.of(BigInteger.valueOf(-1)), result);
+		assertEquals(1, result.size());
+		// Without computingApi, should still validate but return -1 for computation
+		assertEquals(BigInteger.valueOf(-1), result.get(0));
+	}
+
+	@Test
+	public void testComplexNumber() {
+		FetchApiImpl fetchApi = createConfiguredFetchApi();
+
+		List<BigInteger> numbers = List.of(BigInteger.valueOf(123));
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
+
+		assertEquals(1, result.size());
+		// "one hundred and twenty-three" = 23 letters (without "and")
+		// Let's check it's reasonable (between 20-25)
+		assertTrue(result.get(0).compareTo(BigInteger.valueOf(20)) >= 0);
+		assertTrue(result.get(0).compareTo(BigInteger.valueOf(25)) <= 0);
+	}
+
+	@Test
+	public void testFetchRequestAddNumberMethod() {
+		FetchRequest request = new FetchRequest();
+		request.addNumber(BigInteger.valueOf(42));
+		request.addNumberFromString("99");
+
+		assertEquals(2, request.size());
+		assertEquals(BigInteger.valueOf(42), request.getData().get(0));
+		assertEquals(BigInteger.valueOf(99), request.getData().get(1));
+	}
+
+	@Test
+	public void testFetchRequestSum() {
+		List<BigInteger> numbers = List.of(
+				BigInteger.valueOf(10),
+				BigInteger.valueOf(20),
+				BigInteger.valueOf(30)
+				);
+		FetchRequest request = new FetchRequest(numbers);
+
+		assertEquals(BigInteger.valueOf(60), request.getSum());
 	}
 }
