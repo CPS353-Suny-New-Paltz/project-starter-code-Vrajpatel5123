@@ -25,8 +25,10 @@ public class ManualTestingFramework {
 		fetchApi.setComputingApi(computingApi);
 		fetchApi.setDataStoreApi(dataStoreApi);
 
+		boolean success = dataStoreApi.processFile(INPUT, OUTPUT);
 		System.out.println("✓ Created FetchApiImpl with all dependencies set");
 		System.out.println("✓ APIs are now ready to coordinate");
+		System.out.println("✓ File processing result: " + (success ? "SUCCESS" : "FAILED"));
 
 		System.out.println("\n=== Manual Testing Framework Finished ===");
 	}

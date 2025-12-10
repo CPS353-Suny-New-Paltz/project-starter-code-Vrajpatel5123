@@ -160,4 +160,43 @@ public class DataStoreApiImpl implements DataStoreApi {
 	public List<Integer> getStoredNumbers() {
 		return new ArrayList<>(storedNumbers);
 	}
+
+	
+	public boolean processFile(String input, String output) {
+		try {
+			logger.info("Processing file: " + input + " -> " + output);
+			
+			// 1. Read numbers from input file
+			List<Integer> numbers = processFile(input); // Reuse existing method
+			
+			if (numbers.isEmpty()) {
+				logger.warning("No valid numbers processed from input file: " + input);
+				return false;
+			}
+			
+			// 2. Convert numbers to strings for output
+			// Note: This just writes the numbers themselves, not letter counts
+			// For letter counts, we'd need to integrate with ComputingApi
+			List<String> results = new ArrayList<>();
+			for (Integer number : numbers) {
+				results.add(number.toString());
+			}
+			
+			// 3. Write results to output file
+			boolean success = writeResultsToFile(output, results);
+			
+			if (success) {
+				logger.info("Successfully processed " + numbers.size() + 
+					" numbers from " + input + " to " + output);
+			} else {
+				logger.warning("Failed to write results to: " + output);
+			}
+			
+			return success;
+			
+		} catch (Exception e) {
+			logger.severe("Error in processFile(" + input + ", " + output + "): " + e.getMessage());
+			return false;
+		}
+	}
 }
