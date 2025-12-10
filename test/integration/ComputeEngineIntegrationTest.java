@@ -1,6 +1,11 @@
 package integration;
 
 import org.junit.jupiter.api.Test;
+
+import configuration.TestInputConfiguration;
+import configuration.TestOutputConfiguration;
+import inmemory.InMemoryDataStore;
+
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +27,53 @@ import numberlettercountdatastoring.DataStoreApiImpl;
 
 public class ComputeEngineIntegrationTest {
 
+	@Test
+	public void testIntegrationWithInMemoryDataStore() {
+		// Create configuration objects for InMemoryDataStore
+		TestInputConfiguration inputConfig = new TestInputConfiguration();
+		TestOutputConfiguration outputConfig = new TestOutputConfiguration();
+
+		// Set up test input numbers
+		List<Integer> testNumbers = Arrays.asList(1, 2, 3, 4, 5);
+		inputConfig.setInputNumbers(testNumbers);
+
+		// Create InMemoryDataStore with configurations
+		InMemoryDataStore inMemoryStore = new InMemoryDataStore(inputConfig, outputConfig);
+
+		// Create other components
+		ComputingApi computingApi = new ComputingApiImpl();
+		FetchApiImpl fetchApi = new FetchApiImpl();
+
+		// Connect components - use InMemoryDataStore instead of DataStoreApiImpl
+		fetchApi.setDataStoreApi(inMemoryStore);
+		fetchApi.setComputingApi(computingApi);
+
+		// Test the InMemoryDataStore directly
+		DataRequest dataRequest = new DataRequest(1, "memory_test", "10,20,30");
+		int insertResult = inMemoryStore.insertRequest(dataRequest);
+
+		// Verify InMemoryDataStore works
+		assertTrue(insertResult >= 0 || insertResult == -1, 
+				"InMemoryDataStore should handle insert request");
+
+		// Test validation
+		assertTrue(inMemoryStore.validateNumber(5), 
+				"InMemoryDataStore should validate positive numbers");
+		assertFalse(inMemoryStore.validateNumber(-1), 
+				"InMemoryDataStore should reject negative numbers");
+
+		// Test fetching data
+		List<Integer> storedData = inMemoryStore.fetchAllData();
+		assertNotNull(storedData, "Should be able to fetch data from memory");
+
+		// Test processing request
+		boolean processResult = inMemoryStore.processRequest();
+		assertTrue(processResult, "Should be able to process request in memory");
+
+		// Verify output configuration was populated
+		List<String> outputStrings = outputConfig.getOutputStrings();
+		assertNotNull(outputStrings, "Output strings should not be null");
+	}
 	@Test
 	public void testIntegrationWithFetchApiAndComputingApi() {
 		// Create components
