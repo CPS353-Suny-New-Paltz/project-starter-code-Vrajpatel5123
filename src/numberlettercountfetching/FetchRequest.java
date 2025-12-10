@@ -7,6 +7,7 @@ import java.util.logging.Logger;
 
 public class FetchRequest {
 	private List<BigInteger> data;
+	private static final Logger logger = Logger.getLogger(FetchRequest.class.getName());
 
 	public FetchRequest() { 
 		this.data = new ArrayList<>();
@@ -63,6 +64,4 @@ public class FetchRequest {
 					"[" + data.get(0) + ", " + data.get(1) + ", ... (" + data.size() + " items)]";
 		return "FetchRequest{data=" + preview + "}";
 	}
-
-	private static final Logger logger = Logger.getLogger(FetchRequest.class.getName());
 }
