@@ -1,5 +1,10 @@
 package numberlettercountdatastoring;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -36,14 +41,13 @@ public class DataStoreApiImpl implements DataStoreApi {
 					int number = Integer.parseInt(numStr.trim());
 
 					// Validate number before storing
-					if (number < 0) {
-						logger.warning("Skipping negative number: " + number);
-						continue;
+					if (validateNumber(number)) {
+						storedNumbers.add(number);
+						storedCount++;
+						logger.info("Stored number: " + number);
+					} else {
+						logger.warning("Skipping invalid number: " + number);
 					}
-
-					storedNumbers.add(number);
-					storedCount++;
-					logger.info("Stored number: " + number);
 
 				} catch (NumberFormatException e) {
 					logger.warning("Invalid number format: '" + numStr + "'");
@@ -56,11 +60,88 @@ public class DataStoreApiImpl implements DataStoreApi {
 			}
 
 			logger.info("Successfully stored " + storedCount + " numbers");
-			return storedCount; // Return count of stored numbers
+			return storedCount;
 
 		} catch (Exception e) {
 			logger.severe("Error in insertRequest: " + e.getMessage());
 			return -1;
+		}
+	}
+
+	// New method to process a file and store numbers
+	public List<Integer> processFile(String filePath) {
+		List<Integer> processedNumbers = new ArrayList<>();
+
+		try {
+			Path path = Paths.get(filePath);
+			if (!Files.exists(path)) {
+				logger.severe("File not found: " + filePath);
+				return processedNumbers;
+			}
+
+			List<String> lines = Files.readAllLines(path);
+			logger.info("Reading " + lines.size() + " lines from file: " + filePath);
+
+			for (String line : lines) {
+				try {
+					int number = Integer.parseInt(line.trim());
+
+					if (validateNumber(number)) {
+						storedNumbers.add(number);
+						processedNumbers.add(number);
+						logger.info("Processed and stored number from file: " + number);
+					} else {
+						logger.warning("Skipping invalid number from file: " + number);
+					}
+
+				} catch (NumberFormatException e) {
+					logger.warning("Invalid number format in file: '" + line + "'");
+				}
+			}
+
+			logger.info("Successfully processed " + processedNumbers.size() + " numbers from file");
+			return processedNumbers;
+
+		} catch (IOException e) {
+			logger.severe("Error reading file: " + e.getMessage());
+			return processedNumbers;
+		} catch (Exception e) {
+			logger.severe("Error in processFile: " + e.getMessage());
+			return processedNumbers;
+		}
+	}
+
+	// New method to write results to a file
+	public boolean writeResultsToFile(String filePath, List<String> results) {
+		try {
+			if (results == null || results.isEmpty()) {
+				logger.warning("No results to write to file");
+				return false;
+			}
+
+			Path path = Paths.get(filePath);
+			StringBuilder content = new StringBuilder();
+
+			// FIX: Write all results on ONE LINE, comma-separated
+			for (int i = 0; i < results.size(); i++) {
+				content.append(results.get(i));
+				if (i < results.size() - 1) {
+					content.append(",");  // FIXED: Use comma instead of newline
+				}
+			}
+
+			Files.write(path, content.toString().getBytes(),
+					StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+
+			logger.info("Successfully wrote " + results.size() + " results to file: " + filePath);
+			return true;
+
+		} catch (IOException e) {
+			logger.severe("Error writing to file: " + e.getMessage());
+			return false;
+		} catch (Exception e) {
+			logger.severe("Error in writeResultsToFile: " + e.getMessage());
+			return false;
 		}
 	}
 
