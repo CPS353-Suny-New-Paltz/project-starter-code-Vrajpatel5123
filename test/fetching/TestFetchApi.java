@@ -1,3 +1,4 @@
+
 package fetching;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -168,8 +169,8 @@ public class TestFetchApi {
 
 		assertEquals(3, result.size());
 		assertEquals(BigInteger.valueOf(3), result.get(0)); // "one" = 3
-				assertEquals(BigInteger.valueOf(4), result.get(1)); // "five" = 4
-				assertEquals(BigInteger.valueOf(3), result.get(2)); // "ten" = 3
+		assertEquals(BigInteger.valueOf(4), result.get(1)); // "five" = 4
+		assertEquals(BigInteger.valueOf(3), result.get(2)); // "ten" = 3
 	}
 
 	@Test
