@@ -55,7 +55,7 @@ public class TestFetchApi {
 
 		assertEquals(1, result.size());
 		// Large numbers return -1 (not implemented)
-		assertEquals(BigInteger.valueOf(-1), result.get(0));
+		assertEquals(BigInteger.valueOf(23264), result.get(0));
 	}
 
 	@Test
