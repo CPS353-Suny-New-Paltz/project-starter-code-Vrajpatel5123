@@ -181,8 +181,12 @@ public class ComputingApiImpl implements ComputingApi {
 
     // Convert arbitrarily large BigInteger to English words (grouped by thousands)
     private String convertNumberToWords(BigInteger number) {
-        if (number == null) return null;
-        if (number.equals(BigInteger.ZERO)) return "zero";
+        if (number == null) {
+        	return null;
+        }
+        if (number.equals(BigInteger.ZERO)) {
+        	return "zero";
+        }
 
         StringBuilder words = new StringBuilder();
         BigInteger thousand = BigInteger.valueOf(1000);

@@ -71,7 +71,7 @@ public class FetchApiImpl implements FetchApi {
 
 				results.add(letterCount);
 				resultStrings.add(letterCount == null ? "-1" : letterCount.toString()); // Store as string for file
-																						// writing
+				// writing
 			}
 
 			// Do not write to file here; leave persistence to higher-level orchestration
