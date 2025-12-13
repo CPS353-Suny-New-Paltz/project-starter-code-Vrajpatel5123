@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.logging.Logger;
 import numberlettercountdatastoring.DataStoreApi;
 import numberlettercountcomputing.ComputingApi;
-import numberlettercountcomputing.PassData;
 
 public class FetchApiImpl implements FetchApi {
 	private static final Logger logger = Logger.getLogger(FetchApiImpl.class.getName());
@@ -71,7 +70,8 @@ public class FetchApiImpl implements FetchApi {
 				}
 
 				results.add(letterCount);
-				resultStrings.add(letterCount == null ? "-1" : letterCount.toString()); // Store as string for file writing
+				resultStrings.add(letterCount == null ? "-1" : letterCount.toString()); // Store as string for file
+																						// writing
 			}
 
 			// Do not write to file here; leave persistence to higher-level orchestration
@@ -86,7 +86,8 @@ public class FetchApiImpl implements FetchApi {
 	}
 
 	/**
-	 * Process an input file end-to-end: read numbers from `inputPath`, compute letter counts,
+	 * Process an input file end-to-end: read numbers from `inputPath`, compute
+	 * letter counts,
 	 * and write results to `outputPath` via the DataStoreApi.
 	 */
 	public boolean processFile(String inputPath, String outputPath) {
@@ -141,7 +142,7 @@ public class FetchApiImpl implements FetchApi {
 			// Delegate validation to DataStoreApi if available
 			if (dataStoreApi != null) {
 				try {
-					if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
+					if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 &&
 							number.compareTo(BigInteger.valueOf(Integer.MIN_VALUE)) >= 0) {
 						return dataStoreApi.validateNumber(number.intValue());
 					}

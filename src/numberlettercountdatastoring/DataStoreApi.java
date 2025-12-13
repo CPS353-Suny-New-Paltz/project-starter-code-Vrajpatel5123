@@ -10,6 +10,6 @@ public interface DataStoreApi {
 	int insertRequest(DataRequest dataRequest);
 	boolean validateNumber(int number);
 	boolean writeResultsToFile(String filePath, List<String> results);
-	// Read numbers from an input file and return the list of BigInteger values found
+	// Read numbers from an input file and return the list of BigInteger values
 	List<BigInteger> processFile(String input);
 }

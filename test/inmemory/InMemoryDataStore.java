@@ -119,7 +119,8 @@ public class InMemoryDataStore implements DataStoreApi {
 	}
 
 	public List<BigInteger> processFile(String input) {
-		// Simulate reading an input file by returning the configured input numbers as BigInteger.
+		// Simulate reading an input file by returning the configured input numbers as
+		// BigInteger.
 		if (inputConfig == null) {
 			System.err.println("InMemoryDataStore: input configuration is missing");
 			return new ArrayList<>();
