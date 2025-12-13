@@ -54,8 +54,8 @@ public class TestFetchApi {
 		List<BigInteger> result = fetchApi.insertRequest(request);
 
 		assertEquals(1, result.size());
-		// Large numbers return -2 (not implemented)
-		assertEquals(BigInteger.valueOf(-2), result.get(0));
+		// Large numbers return -1 (not implemented)
+		assertEquals(BigInteger.valueOf(-1), result.get(0));
 	}
 
 	@Test

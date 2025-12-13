@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -69,8 +70,8 @@ public class DataStoreApiImpl implements DataStoreApi {
 	}
 
 	// New method to process a file and store numbers
-	public List<Integer> processFile(String filePath) {
-		List<Integer> processedNumbers = new ArrayList<>();
+	public List<BigInteger> processFile(String filePath) {
+		List<BigInteger> processedNumbers = new ArrayList<>();
 
 		try {
 			Path path = Paths.get(filePath);
@@ -84,10 +85,18 @@ public class DataStoreApiImpl implements DataStoreApi {
 
 			for (String line : lines) {
 				try {
-					int number = Integer.parseInt(line.trim());
+					// Parse as BigInteger so we support arbitrarily large inputs
+					BigInteger number = new BigInteger(line.trim());
 
-					if (validateNumber(number)) {
-						storedNumbers.add(number);
+					if (validateNumber(number.intValue())) {
+						// store in integer list only if fits in int range
+						try {
+							int intVal = number.intValueExact();
+							storedNumbers.add(intVal);
+						} catch (ArithmeticException ae) {
+							// Number too large to store in int; skip storing but keep in processed list
+							logger.info("Number too large to store as int, keeping only BigInteger: " + number);
+						}
 						processedNumbers.add(number);
 						logger.info("Processed and stored number from file: " + number);
 					} else {
@@ -167,7 +176,7 @@ public class DataStoreApiImpl implements DataStoreApi {
 			logger.info("Processing file: " + input + " -> " + output);
 			
 			// 1. Read numbers from input file
-			List<Integer> numbers = processFile(input); // Reuse existing method
+			List<BigInteger> numbers = processFile(input); // Reuse existing method
 			
 			if (numbers.isEmpty()) {
 				logger.warning("No valid numbers processed from input file: " + input);
@@ -178,7 +187,7 @@ public class DataStoreApiImpl implements DataStoreApi {
 			// Note: This just writes the numbers themselves, not letter counts
 			// For letter counts, we'd need to integrate with ComputingApi
 			List<String> results = new ArrayList<>();
-			for (Integer number : numbers) {
+			for (BigInteger number : numbers) {
 				results.add(number.toString());
 			}
 			

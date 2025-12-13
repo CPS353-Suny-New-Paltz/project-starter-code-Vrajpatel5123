@@ -58,37 +58,20 @@ public class FetchApiImpl implements FetchApi {
 					resultStrings.add("-1");
 					continue;
 				}
-
-				// Compute letter count via ComputingApi
+				// Compute letter count via ComputingApi (supports BigInteger)
 				BigInteger letterCount = BigInteger.valueOf(-1);
 				if (computingApi != null) {
 					try {
-						if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
-								number.compareTo(BigInteger.valueOf(0)) >= 0) {
-
-							int intNumber = number.intValue();
-
-							// Pass data to ComputingApi
-							PassData passData = computingApi.passData(intNumber);
-
-							// Get results from ComputingApi
-							List<Integer> computeResults = computingApi.processPassData(passData);
-
-							if (computeResults != null && !computeResults.isEmpty()) {
-								letterCount = BigInteger.valueOf(computeResults.get(0));
-								logger.info("Computed letter count for " + number + " = " + letterCount);
-							}
-						} else {
-							logger.warning("Number " + number + " is too large for ComputingApi");
-							letterCount = BigInteger.valueOf(-2);
-						}
+						letterCount = computingApi.computeNumber(number);
+						logger.info("Computed letter count for " + number + " = " + letterCount);
 					} catch (Exception e) {
 						logger.warning("ComputingApi failed for " + number + ": " + e.getMessage());
+						letterCount = BigInteger.valueOf(-1);
 					}
 				}
 
 				results.add(letterCount);
-				resultStrings.add(letterCount.toString()); // Store as string for file writing
+				resultStrings.add(letterCount == null ? "-1" : letterCount.toString()); // Store as string for file writing
 			}
 
 			// Do not write to file here; leave persistence to higher-level orchestration
@@ -119,25 +102,15 @@ public class FetchApiImpl implements FetchApi {
 				return false;
 			}
 
-			List<Integer> numbers = dataStoreApi.processFile(inputPath);
+			List<BigInteger> numbers = dataStoreApi.processFile(inputPath);
 			if (numbers == null || numbers.isEmpty()) {
 				logger.warning("No numbers returned from DataStore.processFile");
 				return false;
 			}
-
 			// 2) Delegate computation to ComputingApi (batch)
-			List<BigInteger> bigNums = new ArrayList<>();
-			for (Integer n : numbers) {
-				if (n == null) {
-					bigNums.add(BigInteger.valueOf(-1));
-				} else {
-					bigNums.add(BigInteger.valueOf(n));
-				}
-			}
-
 			List<BigInteger> results;
 			if (computingApi != null) {
-				results = computingApi.computeNumbers(bigNums);
+				results = computingApi.computeNumbers(numbers);
 			} else {
 				logger.severe("ComputingApi not set on FetchApiImpl");
 				return false;
