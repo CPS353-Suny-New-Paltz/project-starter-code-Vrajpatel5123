@@ -28,4 +28,9 @@ public class SingleThreadedNetworkAPI implements FetchApi {
 	public boolean validateNumber(BigInteger number) {
 		return delegate.validateNumber(number);
 	}
+
+	
+	public boolean processFile(String inputPath, String outputPath) {
+		return delegate.processFile(inputPath, outputPath);
+	}
 }

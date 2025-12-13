@@ -80,7 +80,7 @@ run {
         
         println "\n=== Running Testing2 ==="
         javaexec {
-            mainClass = 'Testing2'
+            mainClass = 'testing2'
             classpath = sourceSets.main.runtimeClasspath
         }
     }
@@ -90,13 +90,13 @@ run {
 task runTestingExample(type: JavaExec) {
     group = 'application'
     description = 'Runs TestingExample only'
-    mainClass = 'TestingExample'
+    mainClass = 'testingExample'
     classpath = sourceSets.main.runtimeClasspath
 }
 
 task runTesting2(type: JavaExec) {
     group = 'application'
     description = 'Runs Testing2 only'
-    mainClass = 'Testing2'
+    mainClass = 'testing2'
     classpath = sourceSets.main.runtimeClasspath
 }
