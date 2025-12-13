@@ -26,7 +26,11 @@ public class ComputingApiImpl implements ComputingApi {
     };
 
     private static final String[] THOUSANDS = {
-        "", "thousand", "million", "billion", "trillion"
+        "", "thousand", "million", "billion", "trillion",
+        "quadrillion", "quintillion", "sextillion", "septillion", "octillion",
+        "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion",
+        "quattuordecillion", "quindecillion", "sexdecillion", "septendecillion", "octodecillion",
+        "novemdecillion", "vigintillion"
     };
 
     public ComputingApiImpl() {
@@ -148,26 +152,73 @@ public class ComputingApiImpl implements ComputingApi {
                 return BigInteger.valueOf(4); // "zero" = 4 letters
             }
 
-            // Try to process using passData if it fits in int
-            if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
-                number.compareTo(BigInteger.valueOf(0)) >= 0) {
-
-                int intNumber = number.intValue();
-                PassData passData = passData(intNumber);
-                List<Integer> results = processPassData(passData);
-
-                if (results != null && !results.isEmpty()) {
-                    return BigInteger.valueOf(results.get(0));
-                }
+            // Convert BigInteger to words using group-wise (thousands) approach
+            String words = convertNumberToWords(number);
+            if (words == null || words.isEmpty()) {
+                logger.warning("Failed to convert number to words: " + number);
+                return BigInteger.valueOf(-1);
             }
 
-            logger.warning("Large number processing not fully implemented for: " + number);
+            // Create PassData from words and reuse processPassData for letter counting
+            PassData passData = new PassData();
+            passData.setData(words);
+            passData.setFromComponent("number_converter");
+            passData.setToComponent("letter_counter");
+
+            List<Integer> results = processPassData(passData);
+            if (results != null && !results.isEmpty()) {
+                return BigInteger.valueOf(results.get(0));
+            }
+
+            logger.warning("Processing produced no results for: " + number);
             return BigInteger.valueOf(-1);
 
         } catch (Exception e) {
             logger.severe("Error processing large number: " + e.getMessage());
             return BigInteger.valueOf(-1);
         }
+    }
+
+    // Convert arbitrarily large BigInteger to English words (grouped by thousands)
+    private String convertNumberToWords(BigInteger number) {
+        if (number == null) {
+        	return null;
+        }
+        if (number.equals(BigInteger.ZERO)) {
+        	return "zero";
+        }
+
+        StringBuilder words = new StringBuilder();
+        BigInteger thousand = BigInteger.valueOf(1000);
+        BigInteger n = number;
+        int groupIndex = 0;
+
+        while (n.compareTo(BigInteger.ZERO) > 0) {
+            BigInteger[] divmod = n.divideAndRemainder(thousand);
+            int group = divmod[1].intValue(); // 0..999
+
+            if (group != 0) {
+                String groupWords = convertHundreds(group);
+                String scale = (groupIndex < THOUSANDS.length) ? THOUSANDS[groupIndex] : "";
+
+                if (!groupWords.isEmpty()) {
+                    if (!scale.isEmpty()) {
+                        groupWords = groupWords + " " + scale;
+                    }
+
+                    if (words.length() == 0) {
+                        words.insert(0, groupWords);
+                    } else {
+                        words.insert(0, groupWords + " " + words.toString());
+                    }
+                }
+            }
+
+            n = divmod[0];
+            groupIndex++;
+        }
+
+        return words.toString().trim();
     }
 
     // Helper method to convert number to words (British English)

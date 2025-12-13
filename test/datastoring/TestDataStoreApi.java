@@ -4,10 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import java.math.BigInteger;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-
 
 import numberlettercountdatastoring.DataRequest;
 import numberlettercountdatastoring.DataStoreApi;
@@ -99,10 +99,10 @@ public class TestDataStoreApi {
 		DataRequest request = new DataRequest(1, "source", "10,20");
 		dataStoreApi.insertRequest(request);
 
-		List<Integer> result = dataStoreApi.getStoredNumbers();
+		List<BigInteger> result = dataStoreApi.getStoredNumbers();
 		assertEquals(2, result.size());
-		assertTrue(result.contains(10));
-		assertTrue(result.contains(20));
+		assertTrue(result.contains(BigInteger.valueOf(10)));
+		assertTrue(result.contains(BigInteger.valueOf(20)));
 	}
 
 	@Test
@@ -113,9 +113,16 @@ public class TestDataStoreApi {
 		dataStoreApi.insertRequest(new DataRequest(2, "source2", "4,5"));
 		dataStoreApi.insertRequest(new DataRequest(3, "source3", "6"));
 
-		List<Integer> result = dataStoreApi.getStoredNumbers();
+		List<BigInteger> result = dataStoreApi.getStoredNumbers();
 		assertEquals(6, result.size());
-		assertTrue(result.containsAll(List.of(1, 2, 3, 4, 5, 6)));
+		assertTrue(result.containsAll(List.of(
+				BigInteger.valueOf(1), 
+				BigInteger.valueOf(2), 
+				BigInteger.valueOf(3),
+				BigInteger.valueOf(4), 
+				BigInteger.valueOf(5), 
+				BigInteger.valueOf(6)
+				)));
 	}
 
 	@Test

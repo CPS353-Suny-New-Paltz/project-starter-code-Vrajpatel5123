@@ -5,6 +5,7 @@ import numberlettercountdatastoring.DataStoreApi;
 import numberlettercountdatastoring.DataRequest;
 import configuration.TestInputConfiguration;
 import configuration.TestOutputConfiguration;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -117,14 +118,18 @@ public class InMemoryDataStore implements DataStoreApi {
 		}
 	}
 
-	public List<Integer> processFile(String input) {
-		// Simulate reading an input file by returning the configured input numbers.
+	public List<BigInteger> processFile(String input) {
+		// Simulate reading an input file by returning the configured input numbers as
+		// BigInteger.
 		if (inputConfig == null) {
 			System.err.println("InMemoryDataStore: input configuration is missing");
 			return new ArrayList<>();
 		}
 
-		// Return a defensive copy to avoid accidental external mutation
-		return new ArrayList<>(inputConfig.getInputNumbers());
+		List<BigInteger> out = new ArrayList<>();
+		for (Integer n : inputConfig.getInputNumbers()) {
+			out.add(BigInteger.valueOf(n));
+		}
+		return out;
 	}
 }
