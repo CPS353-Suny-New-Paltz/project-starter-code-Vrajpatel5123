@@ -17,7 +17,6 @@ public class InMemoryDataStore implements DataStoreApi {
 		this.outputConfig = outputConfig;
 	}
 
-
 	public int insertRequest(DataRequest dataRequest) {
 		if (inputConfig != null && outputConfig != null) {
 			outputConfig.clearOutput();
@@ -30,7 +29,6 @@ public class InMemoryDataStore implements DataStoreApi {
 		return -1;
 	}
 
-
 	public List<Integer> fetchAllData() {
 		if (inputConfig != null) {
 			return new ArrayList<>(inputConfig.getInputNumbers());
@@ -38,24 +36,21 @@ public class InMemoryDataStore implements DataStoreApi {
 		return new ArrayList<>();
 	}
 
-
 	public boolean processRequest() {
 		return inputConfig != null && outputConfig != null;
 	}
-
 
 	public boolean validateNumber(int number) {
 		return number >= 0;
 	}
 
 	private String convertNumberToWord(int number) {
-		String[] numberWords = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+		String[] numberWords = { "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine" };
 		if (number >= 0 && number <= 9) {
 			return numberWords[number];
 		}
 		return String.valueOf(number);
 	}
-
 
 	public boolean writeResultsToFile(String filePath, List<String> results) {
 		if (outputConfig == null || results == null) {
@@ -71,7 +66,7 @@ public class InMemoryDataStore implements DataStoreApi {
 				outputConfig.addOutputString(result);
 			}
 
-			System.out.println("InMemoryDataStore: Written " + results.size() + 
+			System.out.println("InMemoryDataStore: Written " + results.size() +
 					" results to output configuration (simulated file: " + filePath + ")");
 			return true;
 
@@ -80,8 +75,6 @@ public class InMemoryDataStore implements DataStoreApi {
 			return false;
 		}
 	}
-
-
 
 	public boolean processFile(String input, String output) {
 		if (inputConfig == null || outputConfig == null) {
@@ -122,5 +115,16 @@ public class InMemoryDataStore implements DataStoreApi {
 			System.err.println("InMemoryDataStore: Error processing file: " + e.getMessage());
 			return false;
 		}
+	}
+
+	public List<Integer> processFile(String input) {
+		// Simulate reading an input file by returning the configured input numbers.
+		if (inputConfig == null) {
+			System.err.println("InMemoryDataStore: input configuration is missing");
+			return new ArrayList<>();
+		}
+
+		// Return a defensive copy to avoid accidental external mutation
+		return new ArrayList<>(inputConfig.getInputNumbers());
 	}
 }

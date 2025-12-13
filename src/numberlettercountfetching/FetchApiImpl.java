@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import numberlettercountdatastoring.DataStoreApi;
-import numberlettercountdatastoring.DataStoreApiImpl;
 import numberlettercountcomputing.ComputingApi;
 import numberlettercountcomputing.PassData;
 
@@ -92,18 +91,70 @@ public class FetchApiImpl implements FetchApi {
 				resultStrings.add(letterCount.toString()); // Store as string for file writing
 			}
 
-			// Write results to file via DataStoreApi
-			if (dataStoreApi != null && dataStoreApi instanceof DataStoreApiImpl) {
-				DataStoreApiImpl dataStoreImpl = (DataStoreApiImpl) dataStoreApi;
-				// FIX: Write just the numbers, not formatted strings
-				dataStoreImpl.writeResultsToFile("manualTestOutput.txt", resultStrings);
-			}
+			// Do not write to file here; leave persistence to higher-level orchestration
+			// (e.g., processFile) so ManualTestingFramework can drive end-to-end flow.
 
 			return results;
 
 		} catch (Exception e) {
 			logger.severe("Error in insertRequest: " + e.getMessage());
 			return List.of(BigInteger.valueOf(-1));
+		}
+	}
+
+	/**
+	 * Process an input file end-to-end: read numbers from `inputPath`, compute letter counts,
+	 * and write results to `outputPath` via the DataStoreApi.
+	 */
+	public boolean processFile(String inputPath, String outputPath) {
+		try {
+			if (inputPath == null || outputPath == null) {
+				logger.warning("Input or output path is null");
+				return false;
+			}
+
+			// 1) Let DataStore read the input file and return parsed integers
+			if (dataStoreApi == null) {
+				logger.severe("DataStoreApi not set on FetchApiImpl");
+				return false;
+			}
+
+			List<Integer> numbers = dataStoreApi.processFile(inputPath);
+			if (numbers == null || numbers.isEmpty()) {
+				logger.warning("No numbers returned from DataStore.processFile");
+				return false;
+			}
+
+			// 2) Delegate computation to ComputingApi (batch)
+			List<BigInteger> bigNums = new ArrayList<>();
+			for (Integer n : numbers) {
+				if (n == null) {
+					bigNums.add(BigInteger.valueOf(-1));
+				} else {
+					bigNums.add(BigInteger.valueOf(n));
+				}
+			}
+
+			List<BigInteger> results;
+			if (computingApi != null) {
+				results = computingApi.computeNumbers(bigNums);
+			} else {
+				logger.severe("ComputingApi not set on FetchApiImpl");
+				return false;
+			}
+
+			// Convert results to strings and write via DataStoreApi
+			List<String> resultStrings = new ArrayList<>();
+			for (BigInteger r : results) {
+				resultStrings.add(r == null ? "-1" : r.toString());
+			}
+
+			boolean wrote = dataStoreApi.writeResultsToFile(outputPath, resultStrings);
+			return wrote;
+
+		} catch (Exception e) {
+			logger.severe("Error in processFile: " + e.getMessage());
+			return false;
 		}
 	}
 

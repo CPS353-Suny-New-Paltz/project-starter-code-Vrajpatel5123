@@ -111,65 +111,26 @@ public class ComputingApiImpl implements ComputingApi {
     // New method that uses FetchApi to process numbers
     public List<BigInteger> computeNumbers(List<BigInteger> numbers) {
         List<BigInteger> results = new ArrayList<>();
-        
-        if (fetchApi == null) {
-            logger.severe("FetchApi not available for ComputingApiImpl");
-            for (int i = 0; i < numbers.size(); i++) {
-                results.add(BigInteger.valueOf(-1));
-            }
+        if (numbers == null) {
             return results;
         }
 
-        try {
-            // Create a FetchRequest to send to FetchApi
-            FetchRequest fetchRequest = new FetchRequest() {
-                @Override
-                public List<BigInteger> getData() {
-                    return numbers;
-                }
-            };
-
-            // Use FetchApi to process the request
-            results = fetchApi.insertRequest(fetchRequest);
-            logger.info("Computed " + results.size() + " numbers using FetchApi");
-            
-            return results;
-
-        } catch (Exception e) {
-            logger.severe("Error in computeNumbers: " + e.getMessage());
-            for (int i = 0; i < numbers.size(); i++) {
+        for (BigInteger number : numbers) {
+            try {
+                results.add(processLargeNumber(number));
+            } catch (Exception e) {
+                logger.warning("Error computing number " + number + ": " + e.getMessage());
                 results.add(BigInteger.valueOf(-1));
             }
-            return results;
         }
+
+        return results;
     }
 
     // Process a single number using FetchApi
     public BigInteger computeNumber(BigInteger number) {
-        if (fetchApi == null) {
-            logger.severe("FetchApi not available for ComputingApiImpl");
-            return BigInteger.valueOf(-1);
-        }
-
         try {
-            List<BigInteger> singleNumberList = new ArrayList<>();
-            singleNumberList.add(number);
-            
-            FetchRequest fetchRequest = new FetchRequest() {
-                @Override
-                public List<BigInteger> getData() {
-                    return singleNumberList;
-                }
-            };
-
-            List<BigInteger> results = fetchApi.insertRequest(fetchRequest);
-            
-            if (results != null && !results.isEmpty()) {
-                return results.get(0);
-            } else {
-                return BigInteger.valueOf(-1);
-            }
-
+            return processLargeNumber(number);
         } catch (Exception e) {
             logger.severe("Error in computeNumber: " + e.getMessage());
             return BigInteger.valueOf(-1);
@@ -183,12 +144,6 @@ public class ComputingApiImpl implements ComputingApi {
         }
 
         try {
-            // If FetchApi is available, use it
-            if (fetchApi != null) {
-                return computeNumber(number);
-            }
-
-            // Fallback to local processing if no FetchApi
             if (number.equals(BigInteger.ZERO)) {
                 return BigInteger.valueOf(4); // "zero" = 4 letters
             }
@@ -196,11 +151,11 @@ public class ComputingApiImpl implements ComputingApi {
             // Try to process using passData if it fits in int
             if (number.compareTo(BigInteger.valueOf(Integer.MAX_VALUE)) <= 0 && 
                 number.compareTo(BigInteger.valueOf(0)) >= 0) {
-                
+
                 int intNumber = number.intValue();
                 PassData passData = passData(intNumber);
                 List<Integer> results = processPassData(passData);
-                
+
                 if (results != null && !results.isEmpty()) {
                     return BigInteger.valueOf(results.get(0));
                 }
