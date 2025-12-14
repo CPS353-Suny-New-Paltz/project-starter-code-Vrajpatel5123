@@ -2,6 +2,9 @@
 package fetching;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
@@ -17,7 +20,6 @@ import numberlettercountcomputing.ComputingApi;
 import numberlettercountcomputing.ComputingApiImpl;
 import numberlettercountdatastoring.DataStoreApi;
 import numberlettercountdatastoring.DataStoreApiImpl;
-import static org.mockito.Mockito.*;
 import org.mockito.Mockito;
 
 public class TestFetchApi {
