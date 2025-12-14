@@ -17,6 +17,8 @@ import numberlettercountcomputing.ComputingApi;
 import numberlettercountcomputing.ComputingApiImpl;
 import numberlettercountdatastoring.DataStoreApi;
 import numberlettercountdatastoring.DataStoreApiImpl;
+import static org.mockito.Mockito.*;
+import org.mockito.Mockito;
 
 public class TestFetchApi {
 
@@ -222,5 +224,41 @@ public class TestFetchApi {
 		FetchRequest request = new FetchRequest(numbers);
 
 		assertEquals(BigInteger.valueOf(60), request.getSum());
+	}
+
+	@Test
+	public void testInsertRequestWithMocks() {
+		// FetchApiImpl is the unit under test; mock dependencies
+		ComputingApi mockComputing = Mockito.mock(ComputingApi.class);
+		DataStoreApi mockData = Mockito.mock(DataStoreApi.class);
+
+		// Stub computing behavior for specific BigInteger inputs
+		when(mockComputing.computeNumber(BigInteger.valueOf(1))).thenReturn(BigInteger.valueOf(3));
+		when(mockComputing.computeNumber(BigInteger.valueOf(2))).thenReturn(BigInteger.valueOf(3));
+		when(mockComputing.computeNumber(BigInteger.valueOf(3))).thenReturn(BigInteger.valueOf(5));
+
+		// Stub data validation to accept these small integers
+		when(mockData.validateNumber(1)).thenReturn(true);
+		when(mockData.validateNumber(2)).thenReturn(true);
+		when(mockData.validateNumber(3)).thenReturn(true);
+
+		FetchApiImpl fetchApi = new FetchApiImpl();
+		fetchApi.setComputingApi(mockComputing);
+		fetchApi.setDataStoreApi(mockData); // not used in insertRequest but set for completeness
+
+		List<BigInteger> numbers = List.of(BigInteger.valueOf(1), BigInteger.valueOf(2), BigInteger.valueOf(3));
+		FetchRequest request = new FetchRequest(numbers);
+		List<BigInteger> result = fetchApi.insertRequest(request);
+
+		// Verify results come from the mocked ComputingApi
+		assertEquals(3, result.size());
+		assertEquals(BigInteger.valueOf(3), result.get(0));
+		assertEquals(BigInteger.valueOf(3), result.get(1));
+		assertEquals(BigInteger.valueOf(5), result.get(2));
+
+		// Verify computeNumber called for each input
+		verify(mockComputing, times(1)).computeNumber(BigInteger.valueOf(1));
+		verify(mockComputing, times(1)).computeNumber(BigInteger.valueOf(2));
+		verify(mockComputing, times(1)).computeNumber(BigInteger.valueOf(3));
 	}
 }
