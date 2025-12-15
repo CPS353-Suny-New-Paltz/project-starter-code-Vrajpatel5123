@@ -2,13 +2,10 @@
 plugins {
     id 'com.google.protobuf' version '0.9.4'
     id 'java'
-    id 'application'
 }
 
 // Create a custom main class that doesn't exist - we'll override run task
-application {
-    mainClass = 'DummyMain'
-}
+
 
 apply plugin: 'eclipse'
 
@@ -69,23 +66,26 @@ test {
     useJUnitPlatform()
 }
 
-// Override the default run task to execute both programs
-run {
+
+task runBoth(type: DefaultTask) {
+    group = 'application'
     dependsOn classes
-    doFirst {
+
+    doLast {
         println "=== Running TestingExample ==="
         javaexec {
-            mainClass = 'testingExample'
+            mainClass = 'TestingExample'
             classpath = sourceSets.main.runtimeClasspath
         }
-        
+
         println "\n=== Running Testing2 ==="
         javaexec {
-            mainClass = 'testing2'
+            mainClass = 'Testing2'
             classpath = sourceSets.main.runtimeClasspath
         }
     }
 }
+
 
 // Individual tasks if you want to run them separately
 task runTestingExample(type: JavaExec) {
